@@ -81,62 +81,150 @@
       </math>
       For example, in the fairy tale The Emperor's New Clothes, every individual person knows that the emperor has no clothes, but they do not know whether other people know it i.e. whether they think the emperor is actually wearing a new cloth.<br>
       Common knowledge is when everyone in the group knows something, and they all know that everyone knows the thing, and so on ad infinitum.<br>
-    <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-      <mtable displaystyle="true" columnalign="right left">
-        <mtr>
-          <mtd>
-            <msub>
-              <mi>C</mi>
+      <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+        <mtable displaystyle="true" columnalign="right left">
+          <mtr>
+            <mtd>
+              <msub>
+                <mi>C</mi>
+                <mi>G</mi>
+              </msub>
+              <mi>a</mi>
+            </mtd>
+            <mtd>
+              <mo>=</mo>
+              <mo stretchy="false">(</mo>
+              <msub>
+                <mi>K</mi>
+                <mi>i</mi>
+              </msub>
+              <mi>a</mi>
+              <mspace width="0.667em"/>
+              <mo>&#x2200;</mo>
+              <mspace width="0.333em"/>
+              <mi>i</mi>
+              <mo>&#x2208;</mo>
               <mi>G</mi>
-            </msub>
-            <mi>a</mi>
-          </mtd>
-          <mtd>
-            <mo>=</mo>
-            <mo stretchy="false">(</mo>
-            <msub>
-              <mi>K</mi>
+              <mo stretchy="false">)</mo>
+              <mo>&#x2227;</mo>
+              <mo stretchy="false">(</mo>
+              <msub>
+                <mi>K</mi>
+                <mi>i</mi>
+              </msub>
+              <msub>
+                <mi>K</mi>
+                <mi>j</mi>
+              </msub>
+              <mi>a</mi>
+              <mspace width="0.667em"/>
+              <mo>&#x2200;</mo>
+              <mspace width="0.333em"/>
               <mi>i</mi>
-            </msub>
-            <mi>a</mi>
-            <mspace width="0.667em"/>
-            <mo>&#x2200;</mo>
-            <mspace width="0.333em"/>
-            <mi>i</mi>
-            <mo>&#x2208;</mo>
-            <mi>G</mi>
-            <mo stretchy="false">)</mo>
-            <mo>&#x2227;</mo>
-            <mo stretchy="false">(</mo>
-            <msub>
-              <mi>K</mi>
-              <mi>i</mi>
-            </msub>
-            <msub>
-              <mi>K</mi>
+              <mo>,</mo>
               <mi>j</mi>
-            </msub>
-            <mi>a</mi>
-            <mspace width="0.667em"/>
-            <mo>&#x2200;</mo>
-            <mspace width="0.333em"/>
-            <mi>i</mi>
-            <mo>,</mo>
-            <mi>j</mi>
-            <mo>&#x2208;</mo>
+              <mo>&#x2208;</mo>
+              <mi>G</mi>
+              <mo stretchy="false">)</mo>
+              <mo>&#x2227;</mo>
+              <mo>&#x2026;</mo>
+            </mtd>
+          </mtr>
+        </mtable>
+      </math>
+      For example, every educated student knows that “Water boils at 100°C", and they all know that they all know that “Water boils at 100°C”, and so on.<br>
+      Distributed knowledge is when no one in the group knows something, but when whatever they do know is taken together, the group as a whole knows that thing.<br>
+      <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+        <mrow>
+          <msub>
+            <mi>D</mi>
             <mi>G</mi>
-            <mo stretchy="false">)</mo>
-            <mo>&#x2227;</mo>
-            <mo>&#x2026;</mo>
-          </mtd>
-        </mtr>
-      </mtable>
-    </math>
-For example, every educated student knows that “Water boils at 100°C", and they all know that they all know that “Water boils at 100°C”, and so on.
-Distributed knowledge is when no one in the group knows something, but when whatever they do know is taken together, the group as a whole knows that thing.
-\(\begin{equation} \begin{split} D_G &= (\neg K_i a ~~ \forall ~ i \in G) \wedge [(K_1 b_1 \wedge \dots K_{|G|} b_{|G|}) \implies (b_1 \wedge \dots b_{|G|} \implies a)] \end{split} \end{equation}\)
-For example, Alice, Bob and Charlie are playing Uno. Each have one card left. The card on top of the stack is yellow 7. Alice has green 5, Bob has blue 8, and Charlie has red 1. Alice draws a card, and it is blue 7.
-At this point, no one knows what cards they have, but when taking together their knowledge, e.g. Alice knows she has a green 5 and blue 7, Bob knows he has a blue 8 etc., the group as a whole knows that if Alice puts the blue 7, Bob wins, with the group knowing this individually after Alice puts the card and Bob puts his card.
+          </msub>
+          <mo>=</mo>
+          <mrow>
+            <mo>(</mo>
+            <mrow>
+              <mo>&#x00AC;</mo>
+              <msub>
+                <mi>K</mi>
+                <mi>i</mi>
+              </msub>
+              <mi>a</mi>
+              <mspace width="1em"/>
+              <mo>&#x2200;</mo>
+              <mspace width="0.33em"/>
+              <mi>i</mi>
+              <mo>&#x2208;</mo>
+              <mi>G</mi>
+            </mrow>
+            <mo>)</mo>
+          </mrow>
+          <mo>&#x2227;</mo>
+          <mrow>
+            <mo>[</mo>
+            <mrow>
+              <mrow>
+                <mo>(</mo>
+                <mrow>
+                  <msub>
+                    <mi>K</mi>
+                    <mn>1</mn>
+                  </msub>
+                  <msub>
+                    <mi>b</mi>
+                    <mn>1</mn>
+                  </msub>
+                  <mo>&#x2227;</mo>
+                  <mo>&#x2026;</mo>
+                  <msub>
+                    <mi>K</mi>
+                    <mrow>
+                      <mo>|</mo>
+                      <mi>G</mi>
+                      <mo>|</mo>
+                    </mrow>
+                  </msub>
+                  <msub>
+                    <mi>b</mi>
+                    <mrow>
+                      <mo>|</mo>
+                      <mi>G</mi>
+                      <mo>|</mo>
+                    </mrow>
+                  </msub>
+                </mrow>
+                <mo>)</mo>
+              </mrow>
+              <mo>&#x27F9;</mo>
+              <mrow>
+                <mo>(</mo>
+                <mrow>
+                  <msub>
+                    <mi>b</mi>
+                    <mn>1</mn>
+                  </msub>
+                  <mo>&#x2227;</mo>
+                  <mo>&#x2026;</mo>
+                  <msub>
+                    <mi>b</mi>
+                    <mrow>
+                      <mo>|</mo>
+                      <mi>G</mi>
+                      <mo>|</mo>
+                    </mrow>
+                  </msub>
+                  <mo>&#x27F9;</mo>
+                  <mi>a</mi>
+                </mrow>
+                <mo>)</mo>
+              </mrow>
+            </mrow>
+            <mo>]</mo>
+          </mrow>
+        </mrow>
+      </math>
+     For example, Alice, Bob and Charlie are playing Uno. Each have one card left. The card on top of the stack is yellow 7. Alice has green 5, Bob has blue 8, and Charlie has red 1. Alice draws a card, and it is blue 7.<br>
+     At this point, no one knows what cards they have, but when taking together their knowledge, e.g. Alice knows she has a green 5 and blue 7, Bob knows he has a blue 8 etc., the group as a whole knows that if Alice puts the blue 7, Bob wins, with the group knowing this individually after Alice puts the card and Bob puts his card.
     </div>
   </div>
   <script src="main.js"></script>
