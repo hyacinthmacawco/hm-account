@@ -7,44 +7,136 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div style="display: flex;">
-    <div style="width: 100%;">
-      <canvas id="avoidance"></canvas>
-      <div>
-        Avoidance means a certain loss exposure is never acquired or undertaken, or an existing loss exposure is abandoned.<br>
-        An example of the first case, flood losses can be avoided by building a new plant on high ground, well above a floodplain. An example of the second case, a pharmaceutical firm that markets a drug with dangerous side effects can remove the drug from the market to avoid possible legal liability. <br>
-        The main advantage of avoidance is that the chance of loss from the exposure is reduced or eliminated.
-        There are two main disadvantages,
-        <ol>
-          <li>One might not be able to avoid all losses. For example, one might not be able to avoid the premature death of a family member.</li>
-          <li>Avoiding the exposure might not be feasible or practical. For example, a paint factory can avoid losses arising from the production of paint, but without paint production, the firm will not be in business.</li>
-        </ol>
-      </div>
-      <canvas id="lossPrevention"></canvas>
-      <div>
-        Loss prevention refers to measures that reduce the frequency of a particular loss.<br>
-        For example, measures that reduce truck accidents include driver training, zero tolerance for alcohol or drug abuse, and strict enforcement of safety rules.
-      </div>
-      <canvas id="lossReduction"></canvas>
-      <div>
-        Loss reduction refers to measures that reduce the severity of a loss after it occurs.<br>
-        For example, installation of automatic sprinkler system for fires, and first-aid boxes in production areas.
-      </div>
-      <canvas id="duplication"></canvas>
-      <div>
-        Duplication refers to having backups or copies of important documents or property available in case a loss occurs.<br>
-        For example, keeping a spare tire in the trunk, and making copies of key business records.
-      </div>
-      <canvas id="separation"></canvas>
-      <div>
-        Separation means dividing the assets exposed to loss to minimize the harm from a single event.<br>
-        For example, a manufacturing company might divide the production area of a plant into four quadrants by using thick concrete walls, so that if a fire damages production in one quadrant, the walls prevent the fire from spreading to other areas.
-      </div>
-      <canvas id="diversification"></canvas>
-      <div>
-        Diversification refers to reducing the chance of loss by spreading the loss exposure across different parties, securities, or transactions.<br>
-        For example, having contracts with several suppliers can minimize the risk of relying on a single supplier.
-      </div>
+  <div style="display: flex; width: 100%;">
+    <canvas id="avoidance"></canvas>
+    <div>
+      Avoidance means a certain loss exposure is never acquired or undertaken, or an existing loss exposure is abandoned.<br>
+      An example of the first case, flood losses can be avoided by building a new plant on high ground, well above a floodplain. An example of the second case, a pharmaceutical firm that markets a drug with dangerous side effects can remove the drug from the market to avoid possible legal liability. <br>
+      The main advantage of avoidance is that the chance of loss from the exposure is reduced or eliminated.
+      There are two main disadvantages,
+      <ol>
+        <li>One might not be able to avoid all losses. For example, one might not be able to avoid the premature death of a family member.</li>
+        <li>Avoiding the exposure might not be feasible or practical. For example, a paint factory can avoid losses arising from the production of paint, but without paint production, the firm will not be in business.</li>
+      </ol>
+    </div>
+    <canvas id="lossPrevention"></canvas>
+    <div>
+      Loss prevention refers to measures that reduce the frequency of a particular loss.<br>
+      For example, measures that reduce truck accidents include driver training, zero tolerance for alcohol or drug abuse, and strict enforcement of safety rules.
+    </div>
+    <canvas id="lossReduction"></canvas>
+    <div>
+      Loss reduction refers to measures that reduce the severity of a loss after it occurs.<br>
+      For example, installation of automatic sprinkler system for fires, and first-aid boxes in production areas.
+    </div>
+    <canvas id="duplication"></canvas>
+    <div>
+      Duplication refers to having backups or copies of important documents or property available in case a loss occurs.<br>
+      For example, keeping a spare tire in the trunk, and making copies of key business records.
+    </div>
+    <canvas id="separation"></canvas>
+    <div>
+      Separation means dividing the assets exposed to loss to minimize the harm from a single event.<br>
+      For example, a manufacturing company might divide the production area of a plant into four quadrants by using thick concrete walls, so that if a fire damages production in one quadrant, the walls prevent the fire from spreading to other areas.
+    </div>
+    <canvas id="diversification"></canvas>
+    <div>
+      Diversification refers to reducing the chance of loss by spreading the loss exposure across different parties, securities, or transactions.<br>
+      For example, having contracts with several suppliers can minimize the risk of relying on a single supplier.
+    </div>
+    <div>
+      Epistemic logic is a field of modal logic concerned with reasoning about knowledge.<br>
+      The epistemic modal operator is denoted as K, read as “knows that", with an index referring to a particular person. For example, K<sub>1</sub> means “Person 1 knows that”.<br>
+      The operator acts on terms, and let these be labelled as a, b, c, etc., and read as “good a is wanted by”, with an index referring to a particular person. For example, a<sub>1</sub> means “Person 1 wants good a”.<br>
+      Let a* mean “good a is had by". For example, a*<sub>1</sub> means “Person 1 has good a”.<br>
+      Therefore, for example, K<sub>1</sub>a<sub>2</sub> means “Person 1 knows that person 2 wants good a", and K<sub>2</sub>b*<sub>1</sub> means "Person 2 knows that person 1 has good b”.<br>
+      There are three other modal operators, each referring to a group of people, represented by G: mutual knowledge, represented by E<sub>G</sub>, common knowledge, represented by C<sub>G</sub>, and distributed knowledge, represented by D<sub>G</sub>.<br>
+      Mutual knowledge is when everyone in the group knows something, but it does not imply that everyone knows that everyone else knows that thing.<br>
+      <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+        <mtable displaystyle="true" columnalign="right left">
+          <mtr>
+            <mtd>
+              <msub>
+                <mi>E</mi>
+                <mi>G</mi>
+              </msub>
+              <mi>a</mi>
+            </mtd>
+            <mtd>
+              <mo>=</mo>
+              <msub>
+                <mi>K</mi>
+                <mi>i</mi>
+              </msub>
+              <mi>a</mi>
+              <mspace width="1em"/>
+              <mo>&#x2200;</mo>
+              <mspace width="0.333em"/>
+              <mi>i</mi>
+              <mo>&#x2208;</mo>
+              <mi>G</mi>
+            </mtd>
+          </mtr>
+        </mtable>
+      </math>
+      For example, in the fairy tale The Emperor's New Clothes, every individual person knows that the emperor has no clothes, but they do not know whether other people know it i.e. whether they think the emperor is actually wearing a new cloth.<br>
+      Common knowledge is when everyone in the group knows something, and they all know that everyone knows the thing, and so on ad infinitum.<br>
+    <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mtable displaystyle="true" columnalign="right left">
+        <mtr>
+          <mtd>
+            <msub>
+              <mi>C</mi>
+              <mi>G</mi>
+            </msub>
+            <mi>a</mi>
+          </mtd>
+          <mtd>
+            <mo>=</mo>
+            <mo stretchy="false">(</mo>
+            <msub>
+              <mi>K</mi>
+              <mi>i</mi>
+            </msub>
+            <mi>a</mi>
+            <mspace width="0.667em"/>
+            <mo>&#x2200;</mo>
+            <mspace width="0.333em"/>
+            <mi>i</mi>
+            <mo>&#x2208;</mo>
+            <mi>G</mi>
+            <mo stretchy="false">)</mo>
+            <mo>&#x2227;</mo>
+            <mo stretchy="false">(</mo>
+            <msub>
+              <mi>K</mi>
+              <mi>i</mi>
+            </msub>
+            <msub>
+              <mi>K</mi>
+              <mi>j</mi>
+            </msub>
+            <mi>a</mi>
+            <mspace width="0.667em"/>
+            <mo>&#x2200;</mo>
+            <mspace width="0.333em"/>
+            <mi>i</mi>
+            <mo>,</mo>
+            <mi>j</mi>
+            <mo>&#x2208;</mo>
+            <mi>G</mi>
+            <mo stretchy="false">)</mo>
+            <mo>&#x2227;</mo>
+            <mo>&#x2026;</mo>
+          </mtd>
+        </mtr>
+      </mtable>
+    </math>
+For example, every educated student knows that “Water boils at 100°C", and they all know that they all know that “Water boils at 100°C”, and so on.
+Distributed knowledge is when no one in the group knows something, but when whatever they do know is taken together, the group as a whole knows that thing.
+\(\begin{equation} \begin{split} D_G &= (\neg K_i a ~~ \forall ~ i \in G) \wedge [(K_1 b_1 \wedge \dots K_{|G|} b_{|G|}) \implies (b_1 \wedge \dots b_{|G|} \implies a)] \end{split} \end{equation}\)
+For example, Alice, Bob and Charlie are playing Uno. Each have one card left. The card on top of the stack is yellow 7. Alice has green 5, Bob has blue 8, and Charlie has red 1. Alice draws a card, and it is blue 7.
+At this point, no one knows what cards they have, but when taking together their knowledge, e.g. Alice knows she has a green 5 and blue 7, Bob knows he has a blue 8 etc., the group as a whole knows that if Alice puts the blue 7, Bob wins, with the group knowing this individually after Alice puts the card and Bob puts his card.
     </div>
   </div>
   <script src="main.js"></script>
