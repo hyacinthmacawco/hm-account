@@ -28,7 +28,7 @@
   </section>
 
   <section id="composeView" class="compose-view" hidden>
-    <textarea id="composeText" placeholder="Write a message…" aria-label="Message"></textarea>
+    <div class="compose-intro"><strong>Compose a chart message</strong><span>Choose a risk-management chart below. The chart itself is sent to the recipient.</span></div><textarea id="composeText" placeholder="Add an optional explanation to your chart…" aria-label="Optional chart explanation"></textarea>
     <div class="compose-tools">
       <div class="chart-tools" aria-label="Risk management charts">
         <button class="chart-tool" data-chart="avoidance" aria-label="Avoidance chart" title="Avoidance"><svg viewBox="0 0 24 24"><path d="M4 19V5m0 14h16M7 15l4-5 3 3 5-7"/></svg></button>
@@ -40,7 +40,7 @@
       </div>
       <button id="helpButton" class="icon-button" type="button" aria-label="Chart descriptions" title="Chart descriptions"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.2 1.8c-1.2 1-1.8 1.3-1.8 3M12 17.5v.1"/></svg></button>
     </div>
-    <p class="tool-hint">Charts are reference tools. Only your written message is sent.</p>
+    <p class="tool-hint">Select a chart type to enter its data, preview it, and send it as a message.</p>
   </section>
 
   <nav id="toolbar" class="toolbar" aria-label="Chat controls">
@@ -48,11 +48,11 @@
     <div class="toolbar-spacer"></div>
     <button id="cancelComposeButton" class="icon-button" type="button" aria-label="Cancel composing" title="Cancel" hidden><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
     <button id="composeButton" class="icon-button" type="button" aria-label="Compose message" title="Compose message"><svg viewBox="0 0 24 24"><path d="m4 20 4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.5 6.5 3 3"/></svg></button>
-    <button id="composeSend" class="icon-button" type="button" aria-label="Send message" title="Send message" hidden><svg viewBox="0 0 24 24"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4Z"/></svg></button>
+    
   </nav>
 
   <section id="chartDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="chartTitle" hidden>
-    <div class="dialog-card"><header><h2 id="chartTitle">Chart</h2><button class="icon-button dialog-close" type="button" aria-label="Close">×</button></header><div class="chart-wrap"><canvas id="chartCanvas"></canvas></div></div>
+    <div class="dialog-card chart-editor"><header><h2 id="chartTitle">Chart</h2><button class="icon-button dialog-close" type="button" aria-label="Close">×</button></header><label class="field-label" for="chartName">Chart title</label><input id="chartName" maxlength="100" placeholder="Give your chart a title"><label class="field-label" for="chartContext">What does this chart represent?</label><textarea id="chartContext" rows="2" placeholder="Describe the risk, measure, or scenario…"></textarea><label class="field-label" for="chartLabels">Category labels <span>comma-separated</span></label><input id="chartLabels" placeholder="Category A, Category B, Category C"><label class="field-label" for="chartValues">Values <span>one number per category, in the same order</span></label><input id="chartValues" inputmode="decimal" placeholder="60, 30, 10"><p id="chartError" class="error" role="status" aria-live="polite"></p><div class="preview-heading">Chart preview</div><div class="chart-wrap"><canvas id="chartCanvas"></canvas></div><button id="sendChartButton" class="primary-button send-chart" type="button">Send chart message</button></div>
   </section>
   <section id="helpDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
     <div class="dialog-card"><header><h2 id="helpTitle">Risk management charts</h2><button class="icon-button dialog-close" type="button" aria-label="Close">×</button></header><div id="chartDescriptions" class="descriptions"></div></div>
