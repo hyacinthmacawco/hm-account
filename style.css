@@ -42,3 +42,12 @@
 .chart-series>label{font-size:12px;font-weight:650}
 .chart-series .chart-data-row{grid-template-columns:repeat(3,minmax(0,1fr)) 30px}
 .chart-data-row-head span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.topbar{position:absolute;z-index:30;top:0;left:0;right:0;height:var(--toolbar-height);display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:rgba(255,255,255,.98)}
+.topbar-left{display:flex;align-items:center;gap:2px}
+.chat-view,.compose-view{inset:var(--toolbar-height) 0 var(--toolbar-height)}
+.chat-menu{position:absolute;z-index:40;top:var(--toolbar-height);left:10px;width:min(310px,calc(100vw - 20px));max-height:min(65vh,520px);overflow:auto;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 35px #0002;padding:10px}
+.chat-menu-heading{font-size:13px;font-weight:700;padding:7px 9px 10px}.chat-list{display:grid;gap:3px}
+.chat-list-item{display:block;width:100%;padding:11px 10px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:0;border-radius:7px;background:#fff;color:var(--text);font-size:13px}
+.chat-list-item.active{background:#edf4ff;color:var(--blue);font-weight:650}
+#toolbar{z-index:20}#toolbar[hidden],#topbar[hidden]{display:none!important}
