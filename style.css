@@ -1,0 +1,136 @@
+/* Responsive chart editor layout. Puppertino continues to style the controls. */
+#pendingCharts {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#pendingCharts > .chart-card {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.chart-card > *,
+.chart-editor,
+.chart-row-list,
+.chart-data-row,
+.chart-series,
+.chart-preview {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.chart-card > .chart-title-field {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.chart-editor {
+  display: grid;
+  gap: 16px;
+  padding: 0;
+}
+
+.chart-row-list {
+  display: grid;
+  gap: 10px;
+  padding: 0;
+}
+
+.chart-grid-head,
+.chart-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+}
+
+.chart-grid-head {
+  padding: 0 2px;
+  font-size: 0.85rem;
+}
+
+.chart-data-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+}
+
+.chart-fields > *,
+.chart-data-row input,
+.chart-series input {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.chart-series {
+  display: grid;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.chart-series-label {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.chart-preview {
+  position: relative;
+  width: 100%;
+  height: clamp(210px, 42vw, 320px);
+  padding: 0;
+}
+
+.chart-preview canvas {
+  display: block;
+  max-width: 100%;
+}
+
+@media (max-width: 600px) {
+  #composeView > .p-container {
+    padding-inline: 12px;
+  }
+
+  #pendingCharts > .chart-card {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .chart-grid-head {
+    display: none;
+  }
+
+  .chart-fields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .chart-data-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px;
+  }
+
+  .chart-preview {
+    height: 220px;
+  }
+}
+
+@media (min-width: 601px) {
+  .chart-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .chart-series-label {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
