@@ -36,3 +36,9 @@ button,textarea,input{font:inherit}[hidden]{display:none!important}
 .version-panel{position:absolute;z-index:60;inset:0 0 var(--toolbar-height);overflow:auto;padding:16px}.version-entry{padding:10px 0}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 #toolbar[hidden],#topbar[hidden]{display:none!important}
+/* Phosphor icon controls */
+.icon-button{display:inline-flex;align-items:center;justify-content:center;min-width:42px;min-height:42px;padding:8px;font-size:20px;line-height:1}
+.icon-button i,.compose-icon-button i{display:block;font-size:1.2em;line-height:1}
+.compose-icon-button{width:58px;height:58px;min-width:58px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:24px}
+.chart-action-button{min-width:40px;min-height:40px}
+.chat-list-action{width:38px;height:38px;padding:6px}
