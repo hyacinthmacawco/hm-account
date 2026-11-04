@@ -45,10 +45,17 @@
     <section id="chat" aria-label="Conversation" hidden>
       <ul id="messages" class="p-list p-list-touch" aria-live="polite"></ul>
     </section>
-    <section id="composeView" class="p-container" hidden>
-      <ul id="pendingCharts" class="p-list p-list-touch p-list-inset"></ul>
-      <div>
-        <h2 class="p-list-touch-header p-list-touch-header--prominent">Add a chart</h2>
+    <section id="composeView" class="p-pane-scroll" hidden>
+      <div class="p-container">
+        <h2 class="p-list-touch-header p-list-touch-header--prominent">New message</h2>
+        <div class="p-field-group-touch">
+          <textarea id="messageDraft" class="p-field p-field-touch" rows="3" placeholder="Write a message…" aria-label="Message"></textarea>
+        </div>
+      </div>
+      <div class="p-container">
+        <h2 class="p-list-touch-header p-list-touch-header--prominent">Charts</h2>
+        <ul id="pendingCharts" class="p-list p-list-touch p-list-inset"></ul>
+        <h3 class="p-list-touch-header">Add a chart</h3>
         <ul class="p-list p-list-touch p-list-inset">
           <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="avoidance" type="button"><span class="p-list-label"><span class="p-list-title">Avoidance</span></span><i class="ph-bold ph-plus-circle p-list-trailing-icon" aria-hidden="true"></i></button></li>
           <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="lossPrevention" type="button"><span class="p-list-label"><span class="p-list-title">Loss prevention</span></span><i class="ph-bold ph-plus-circle p-list-trailing-icon" aria-hidden="true"></i></button></li>
@@ -59,7 +66,6 @@
         </ul>
         <button id="helpButton" class="p-button p-button-touch p-button-secondary" type="button" data-p-open-modal="#helpSheet">Chart help</button>
       </div>
-    </div>
     </section>
   </section>
 
