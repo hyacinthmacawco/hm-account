@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#ffffff">
   <title>HM Account</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@codedgar/puppertino@2.0.0/dist/css/puppertino.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@codedgar/puppertino@2.0.0/dist/css/puppertino.min.css">
   <link rel="stylesheet" href="./style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -18,7 +19,7 @@
     <button id="copyCode" class="p-button p-button-primary" type="button">Copy Request</button>
     
     <label class="sr-only" for="pasteCode">Paste connection code</label>
-    <textarea id="pasteCode" placeholder="Paste connection code…" rows="3"></textarea>
+    <textarea id="pasteCode" class="p-field p-field-touch" placeholder="Paste connection code…" rows="3"></textarea>
     <p id="error" class="error" role="status" aria-live="polite"></p>
   </section>
 
@@ -30,35 +31,35 @@
     <div id="pendingCharts" class="pending-charts" aria-live="polite"></div>
     <div class="compose-tools">
       <div class="chart-tools" aria-label="Risk management charts">
-        <button class="chart-tool" data-chart="avoidance" aria-label="Avoidance chart" title="Avoidance"><svg viewBox="0 0 24 24"><path d="M4 19V5m0 14h16M7 15l4-5 3 3 5-7"/></svg></button>
-        <button class="chart-tool" data-chart="lossPrevention" aria-label="Loss prevention chart" title="Loss prevention"><svg viewBox="0 0 24 24"><path d="M5 19V9h4v10M11 19V5h4v14M17 19v-7h4v7"/></svg></button>
-        <button class="chart-tool" data-chart="lossReduction" aria-label="Loss reduction chart" title="Loss reduction"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-9zM14 3.3V10h6.7A9 9 0 0 0 14 3.3Z"/></svg></button>
-        <button class="chart-tool" data-chart="duplication" aria-label="Duplication chart" title="Duplication"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="12" height="12" rx="1"/><path d="M8 20h12V8"/></svg></button>
-        <button class="chart-tool" data-chart="separation" aria-label="Separation chart" title="Separation"><svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/></svg></button>
-        <button class="chart-tool" data-chart="diversification" aria-label="Diversification chart" title="Diversification"><svg viewBox="0 0 24 24"><circle cx="7" cy="8" r="3"/><circle cx="17" cy="6" r="2"/><circle cx="15" cy="17" r="4"/><path d="m9.5 9.5 3 4M10 7l5-1M8 11l5 5"/></svg></button>
+        <button class="chart-tool p-button p-button-secondary p-button-touch" data-chart="avoidance" type="button">Avoidance</button>
+        <button class="chart-tool p-button p-button-secondary p-button-touch" data-chart="lossPrevention" type="button">Loss prevention</button>
+        <button class="chart-tool p-button p-button-secondary p-button-touch" data-chart="lossReduction" type="button">Loss reduction</button>
+        <button class="chart-tool p-button p-button-secondary p-button-touch" data-chart="duplication" type="button">Duplication</button>
+        <button class="chart-tool p-button p-button-secondary p-button-touch" data-chart="separation" type="button">Separation</button>
+        <button class="chart-tool p-button p-button-secondary p-button-touch" data-chart="diversification" type="button">Diversification</button>
       </div>
-      <button id="helpButton" class="icon-button" type="button" aria-label="Chart descriptions" title="Chart descriptions"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.2 1.8c-1.2 1-1.8 1.3-1.8 3M12 17.5v.1"/></svg></button>
+      <button id="helpButton" class="p-button p-button-secondary p-button-touch" type="button">Chart help</button>
     </div>
   </section>
 
   <nav id="topbar" class="topbar" aria-label="Chat navigation" hidden>
     <div class="topbar-left">
-      <button id="chatMenuButton" class="icon-button" type="button" aria-label="Show chats" title="Show chats"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-      <button id="newChatTopButton" class="icon-button" type="button" aria-label="New chat" title="New chat"><svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H18a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5.5A1.5 1.5 0 0 1 4 18.5z"/><path d="m8 16 1-3 7-7 2 2-7 7z"/></svg></button>
+      <button id="chatMenuButton" class="p-button p-button-borderless p-button-touch" type="button">Chats</button>
+      <button id="newChatTopButton" class="p-button p-button-borderless p-button-touch" type="button">New chat</button>
     </div>
-    <button id="openChatButton" class="icon-button" type="button" aria-label="Open chats file" title="Open chats file"><svg viewBox="0 0 24 24"><path d="M3 7h7l2 2h9v10H3z"/><path d="M12 16V11m-3 3 3-3 3 3"/></svg></button>
-    <button id="saveChatButton" class="icon-button" type="button" aria-label="Save chats" title="Save chats"><svg viewBox="0 0 24 24"><path d="M5 3h12l4 4v14H3V3z"/><path d="M7 3v6h10V3M7 21v-8h10v8"/></svg></button>
+    <button id="openChatButton" class="p-button p-button-borderless p-button-touch" type="button">Open</button>
+    <button id="saveChatButton" class="p-button p-button-borderless p-button-touch" type="button">Save</button>
   </nav>
   <aside id="chatMenu" class="chat-menu" hidden aria-label="Chats"><div id="chatList" class="chat-list"></div></aside>
   <input id="loadChatFile" type="file" accept="application/json" hidden>
   <nav id="toolbar" class="toolbar" aria-label="Chat controls" hidden>
-    <button id="cancelComposeButton" class="icon-button" type="button" aria-label="Cancel compose" title="Cancel compose" hidden><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <button id="cancelComposeButton" class="p-button p-button-secondary p-button-touch" type="button" hidden>Cancel</button>
     <div class="toolbar-spacer"></div>
-    <button id="composeButton" class="icon-button compose-action" type="button" aria-label="Compose chart message" title="Compose chart message"><svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button>
+    <button id="composeButton" class="p-button p-button-primary p-button-touch" type="button" aria-label="Compose chart message" title="Compose chart message">Compose</button>
   </nav>
 
   <section id="helpDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
-    <div class="dialog-card"><header><h2 id="helpTitle">Risk management charts</h2><button class="p-button p-button-secondary dialog-close" type="button" aria-label="Close">Close</button></header><div id="chartDescriptions" class="descriptions"></div></div>
+    <div class="dialog-card p-window"><header><h2 id="helpTitle">Risk management charts</h2><button class="p-button p-button-secondary dialog-close" type="button" aria-label="Close">Close</button></header><div id="chartDescriptions" class="descriptions"></div></div>
   </section>
 
 </main>
