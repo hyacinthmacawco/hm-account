@@ -182,12 +182,12 @@ function composerChartConfig(key){
 }
 function helpExampleConfig(key){
  const examples={
-  avoidance:{type:"radar",data:{labels:["No flood exposure","No hazardous stock","Safe location"],datasets:[{label:"Exposure eliminated",data:[90,75,85],backgroundColor:"rgba(23,105,224,.2)",borderColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:100}}}},
-  lossPrevention:{type:"line",data:{labels:["Before training","Month 1","Month 2","Month 3"],datasets:[{label:"Accidents",data:[18,13,9,5],borderColor:"#1769e0",backgroundColor:"#9bbce9",tension:.25}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}},
-  lossReduction:{type:"bar",data:{labels:["No protection","Sprinklers","First aid","Emergency team"],datasets:[{label:"Average loss severity",data:[100,55,72,40],backgroundColor:["#d65a5a","#1769e0","#4f9b78","#e8b65b"]}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}},
-  duplication:{type:"doughnut",data:{labels:["Primary records","Backup copy","Off-site copy"],datasets:[{label:"Records available",data:[50,30,20],backgroundColor:["#1769e0","#69a98b","#e8b65b"]}]},options:{responsive:true,maintainAspectRatio:false}},
-  separation:{type:"polarArea",data:{labels:["Building A","Building B","Building C","Remote storage"],datasets:[{label:"Assets distributed",data:[35,25,20,20],backgroundColor:["#1769e0","#69a98b","#e8b65b","#a58bd4"]}]},options:{responsive:true,maintainAspectRatio:false}},
-  diversification:{type:"pie",data:{labels:["Supplier A","Supplier B","Supplier C","Supplier D"],datasets:[{label:"Supply share",data:[35,30,20,15],backgroundColor:["#1769e0","#69a98b","#e8b65b","#a58bd4"]}]},options:{responsive:true,maintainAspectRatio:false}}
+  avoidance:{type:"radar",data:{labels:["Flood exposure","Hazardous inventory","Unsafe location"],datasets:[{label:"Exposure eliminated",data:[85,70,95],backgroundColor:"rgba(23,105,224,.2)",borderColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:100}}}},
+  lossPrevention:{type:"bar",data:{labels:["Driver training","No alcohol or drugs","Safety rules"],datasets:[{label:"Before",data:[80,90,65],backgroundColor:"#9bbce9"},{label:"After",data:[35,20,30],backgroundColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}},
+  lossReduction:{type:"doughnut",data:{labels:["Fire damage","Sprinklers","First aid","Fire service"],datasets:[{label:"Loss severity share",data:[30,25,20,25],backgroundColor:["#d65a5a","#1769e0","#4f9b78","#e8b65b"]}]},options:{responsive:true,maintainAspectRatio:false}},
+  duplication:{type:"scatter",data:{datasets:[{label:"Backup availability",data:[{x:10,y:20},{x:15,y:20},{x:50,y:40},{x:65,y:70}],backgroundColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:"Storage location"}},y:{title:{display:true,text:"Availability"}}}}},
+  separation:{type:"bar",data:{labels:["January","February","March"],datasets:[{label:"Section 1",data:[40,100,30],backgroundColor:"#1769e0"},{label:"Section 2",data:[20,50,10],backgroundColor:"#8ab2e8"}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}}}},
+  diversification:{type:"bubble",data:{datasets:[{label:"Stocks",data:[{x:20,y:10,r:7},{x:22,y:12,r:5}],backgroundColor:"#1769e0"},{label:"Bonds",data:[{x:50,y:40,r:4},{x:60,y:22,r:6}],backgroundColor:"#69a98b"}]},options:{responsive:true,maintainAspectRatio:false}}
  };return examples[key];
 }
 $("helpButton").addEventListener("click",()=>{
