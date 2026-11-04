@@ -1,7 +1,7 @@
 import { createP2P } from "./p2p.js";
 const $=id=>document.getElementById(id);
 const setup=$("setupView"),choice=$("chatChoice"),chat=$("chat"),qr=$("qrCode"),paste=$("pasteCode");
-const messagesEl=$("messages"),composeView=$("composeView"),composeText=$("composeText"),composeButton=$("composeButton"),errorEl=$("error");
+const messagesEl=$("messages"),composeView=$("composeView"),composeButton=$("composeButton"),errorEl=$("error");
 let connected=false,chatStarted=false,localCode="",stage="offer",composerOpen=false,messages=[],pendingCharts=[],peer;
 const renderedCharts=[];
 const pendingChartInstances=[];
@@ -156,7 +156,7 @@ paste.addEventListener("paste",()=>setTimeout(processPaste,100));
 paste.addEventListener("input",()=>{if(paste.value.trim().endsWith("}"))processPaste();});
 
 $("newChatButton").addEventListener("click",()=>{
- messages=[];pendingCharts=[];composeText.value="";chatStarted=true;setError("");render();
+ messages=[];pendingCharts=[];chatStarted=true;setError("");render();
 });
 $("loadChatButton").addEventListener("click",()=>$("loadChatFile").click());
 $("loadChatFile").addEventListener("change",async e=>{
@@ -171,7 +171,7 @@ $("loadChatFile").addEventListener("change",async e=>{
 });
 $("saveChatButton").addEventListener("click",()=>{
  if(composerOpen){
-  composerOpen=false;pendingCharts=[];composeText.value="";setError("");render();return;
+  composerOpen=false;pendingCharts=[];setError("");render();return;
  }
  const data={format:"hm-account-chat",version:3,messages};
  const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
@@ -183,10 +183,10 @@ composeButton.addEventListener("click",()=>{
  if(!pendingCharts.length){setError("Add at least one chart before sending.");return;}
  if(pendingCharts.some(c=>c.dataError)){setError("Fix the invalid chart data before sending.");return;}
  if(!peer.isConnected()){setError("Connection is not open.");return;}
- const message={kind:"risk-chart",charts:pendingCharts.map(c=>({...c,labels:[...c.labels],values:[...c.values]})),caption:composeText.value.trim(),timestamp:Date.now()};
+ const message={kind:"risk-chart",charts:pendingCharts.map(c=>({...c,config:JSON.parse(JSON.stringify(c.config))})),timestamp:Date.now()};
  try{
   peer.sendMessage(JSON.stringify(message));messages.push({...message,mine:true});
-  pendingCharts=[];composeText.value="";composerOpen=false;setError("");render();
+  pendingCharts=[];composerOpen=false;setError("");render();
  }catch(e){setError(e.message||"Message could not be sent.");}
 });
 document.querySelectorAll(".chart-tool").forEach(b=>b.addEventListener("click",()=>addChartToCompose(b.dataset.chart)));
