@@ -1,120 +1,78 @@
 import { createP2P } from "./p2p.js";
-
-const $ = id => document.getElementById(id);
-const setup=$("setupView"), chat=$("chat"), qr=$("qrCode"), paste=$("pasteCode");
-const messagesEl=$("messages"), composeView=$("composeView"), composeText=$("composeText");
-const composeButton=$("composeButton"), composeSend=$("composeSend"), cancelButton=$("cancelComposeButton");
-const errorEl=$("error");
-let connected=false, localCode="", stage="offer", composerOpen=false, messages=[], versions=[];
-let peer;
-
+const $=id=>document.getElementById(id);
+const setup=$("setupView"),chat=$("chat"),qr=$("qrCode"),paste=$("pasteCode"),messagesEl=$("messages"),composeView=$("composeView"),composeText=$("composeText"),composeButton=$("composeButton"),cancelButton=$("cancelComposeButton"),errorEl=$("error");
+let connected=false,localCode="",stage="offer",composerOpen=false,messages=[],versions=[],peer,editorChart=null,activeChartKey=null;
+const renderedCharts=[];
 const chartInfo={
- avoidance:{title:"Avoidance",description:"Avoidance means never acquiring or undertaking a loss exposure, or abandoning an existing exposure. For example, locating a new plant on high ground to avoid flood risk, or withdrawing a product with dangerous side effects. Its main advantage is eliminating the exposure; its limitations are that some losses cannot be avoided and avoidance may be impractical."},
- lossPrevention:{title:"Loss prevention",description:"Loss prevention consists of measures that reduce the frequency of a particular loss. Examples include driver training, prohibiting alcohol or drug use while driving, and enforcing safety rules to reduce vehicle accidents."},
- lossReduction:{title:"Loss reduction",description:"Loss reduction consists of measures that reduce the severity of a loss after it occurs. Examples include automatic fire-sprinkler systems, first-aid equipment, and emergency response procedures."},
- duplication:{title:"Duplication",description:"Duplication means keeping backups or copies of important property or information so they remain available if the original is lost. Examples include spare tires and duplicate business records."},
- separation:{title:"Separation",description:"Separation means dividing assets exposed to loss so that one event cannot damage everything at once. For example, dividing a factory into fire-resistant sections can prevent a fire in one section from spreading throughout the facility."},
- diversification:{title:"Diversification",description:"Diversification reduces exposure by spreading it across different parties, securities, suppliers, or transactions. For example, using several suppliers reduces dependence on a single supplier."}
+ avoidance:{title:"Avoidance",description:"Avoidance means not undertaking or abandoning a loss exposure. Examples include locating a facility outside a flood zone or withdrawing a product with dangerous side effects. It eliminates the exposure where feasible.",style:"bar",axis:"x"},
+ lossPrevention:{title:"Loss prevention",description:"Loss prevention reduces the frequency of a particular loss. Examples include driver training, prohibiting alcohol or drug use while driving, and enforcing safety rules.",style:"bar"},
+ lossReduction:{title:"Loss reduction",description:"Loss reduction reduces the severity of a loss after it occurs. Examples include automatic sprinklers, first-aid equipment, and emergency response procedures.",style:"line"},
+ duplication:{title:"Duplication",description:"Duplication keeps backups or copies of important property or information available if the original is lost. Examples include spare tires and duplicate business records.",style:"doughnut"},
+ separation:{title:"Separation",description:"Separation divides assets exposed to loss so one event cannot damage everything at once. For example, fire-resistant factory sections can prevent a fire spreading throughout a facility.",style:"bar"},
+ diversification:{title:"Diversification",description:"Diversification spreads exposure across different parties, securities, suppliers, or transactions. Using several suppliers reduces dependence on one supplier.",style:"pie"}
 };
-let activeChart=null;
-let chartInstance=null;
-function setError(message=""){errorEl.textContent=message;}
-function render(){
- setup.hidden=connected; chat.hidden=!connected; composeView.hidden=!composerOpen;
- $("versionButton").hidden=composerOpen; composeButton.hidden=composerOpen;
- cancelButton.hidden=!composerOpen; composeSend.hidden=!composerOpen;
- renderMessages();
+function setError(v=""){errorEl.textContent=v;}
+function setChartError(v=""){$("chartError").textContent=v;}
+function chartConfig(c){
+ const info=chartInfo[c.type]||chartInfo.avoidance,isCircular=info.style==="pie"||info.style==="doughnut";
+ return {type:info.style,data:{labels:c.labels,datasets:[{label:c.title||info.title,data:c.values,borderWidth:2,tension:.25,backgroundColor:isCircular?["#1769e0","#4f9bd9","#75b99b","#e8b65b","#a58bd4","#e58b8b"]:"rgba(23,105,224,.65)",borderColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:isCircular}},...(info.style==="bar"&&info.axis==="x"?{indexAxis:"y"}:{}),scales:isCircular?{}:{y:{beginAtZero:true}}}};
 }
+function render(){setup.hidden=connected;chat.hidden=!connected;composeView.hidden=!composerOpen;$("versionButton").hidden=composerOpen;composeButton.hidden=composerOpen;cancelButton.hidden=!composerOpen;$("connectionStatus").textContent=connected?"Connected":"Connecting…";renderMessages();}
 function renderMessages(){
- messagesEl.replaceChildren();
- for(const message of messages){
-  const item=document.createElement("article"); item.className="message "+(message.mine?"mine":"theirs");
-  const meta=document.createElement("div");meta.className="message-meta";
-  meta.textContent=(message.mine?"You":"Peer")+" · "+new Date(message.timestamp).toLocaleString();
-  const body=document.createElement("div");body.textContent=message.text;
-  item.append(meta,body);messagesEl.append(item);
+ while(renderedCharts.length)renderedCharts.pop().destroy();messagesEl.replaceChildren();
+ for(const m of messages){
+  const item=document.createElement("article");item.className="message "+(m.mine?"mine":"theirs");
+  const meta=document.createElement("div");meta.className="message-meta";meta.textContent=(m.mine?"You":"Peer")+" · "+new Date(m.timestamp).toLocaleString();item.append(meta);
+  if(m.kind==="risk-chart"&&m.chart){
+   const card=document.createElement("div");card.className="chart-message";const h=document.createElement("h3");h.textContent=m.chart.title;card.append(h);
+   if(m.chart.context){const p=document.createElement("p");p.className="chart-context";p.textContent=m.chart.context;card.append(p);}
+   const canvas=document.createElement("canvas");canvas.setAttribute("role","img");canvas.setAttribute("aria-label",m.chart.title+" chart");card.append(canvas);item.append(card);
+   try{renderedCharts.push(new Chart(canvas,chartConfig(m.chart)));}catch(e){const p=document.createElement("p");p.textContent="Chart display error: "+e.message;card.append(p);}
+   if(m.caption){const p=document.createElement("p");p.className="message-caption";p.textContent=m.caption;item.append(p);}
+  }else{const body=document.createElement("div");body.textContent=m.text||"";item.append(body);}
+  messagesEl.append(item);
  }
  messagesEl.scrollTop=messagesEl.scrollHeight;
 }
-function receive(payload){
- let text=payload, timestamp=Date.now();
- try{const data=JSON.parse(payload);if(data&&data.kind==="chat-message"&&typeof data.text==="string"){text=data.text;timestamp=Number(data.timestamp)||timestamp;}}catch{}
- messages.push({text:String(text),timestamp,mine:false});renderMessages();
+function receive(raw){
+ let m;try{const d=JSON.parse(raw);if(d?.kind==="risk-chart"&&d.chart&&Array.isArray(d.chart.labels)&&Array.isArray(d.chart.values))m={kind:"risk-chart",chart:d.chart,caption:typeof d.caption==="string"?d.caption:"",timestamp:Number(d.timestamp)||Date.now(),mine:false};else if(d?.kind==="chat-message"&&typeof d.text==="string")m={kind:"text",text:d.text,timestamp:Number(d.timestamp)||Date.now(),mine:false};else m={kind:"text",text:String(raw),timestamp:Date.now(),mine:false};}catch{m={kind:"text",text:String(raw),timestamp:Date.now(),mine:false};}
+ messages.push(m);renderMessages();
 }
-peer=createP2P({
- onMessage:receive,
- onLocalCode:(code,type)=>{localCode=code;stage=type;renderConnectionCode();},
- onConnectionState:state=>{connected=state.connected;render();},
- onError:setError
+peer=createP2P({onMessage:receive,onLocalCode:(code,type)=>{localCode=code;stage=type;renderConnectionCode();},onConnectionState:s=>{connected=s.connected;render();},onError:setError});
+function renderConnectionCode(){qr.replaceChildren();if(localCode&&typeof QRCode!=="undefined")new QRCode(qr,{text:localCode,width:260,height:260,correctLevel:QRCode.CorrectLevel.L});$("copyCode").textContent=stage==="answer"?"Copy Answer":"Copy Request";paste.hidden=stage==="answer";$("copyCode").hidden=!localCode;}
+$("copyCode").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(localCode);$("copyCode").textContent="Copied";}catch{setError("Clipboard unavailable. Copy the connection code manually.");}});
+async function processPaste(){const v=paste.value.trim();if(!v)return;try{await peer.processCode(v,stage);paste.value="";setError("");}catch(e){setError(e.message||"Could not process connection code.");}}
+paste.addEventListener("paste",()=>setTimeout(processPaste,100));paste.addEventListener("input",()=>{if(paste.value.trim().endsWith("}"))processPaste();});
+composeButton.addEventListener("click",()=>{composerOpen=true;setError("");render();});
+cancelButton.addEventListener("click",()=>{composerOpen=false;composeText.value="";render();});
+function readChartForm(){
+ const labels=$("chartLabels").value.split(",").map(x=>x.trim()).filter(Boolean),raw=$("chartValues").value.split(",").map(x=>x.trim()).filter(Boolean);
+ if(labels.length<2||labels.length>20)throw Error("Enter between 2 and 20 category labels.");
+ if(raw.length!==labels.length)throw Error("Enter exactly one value for each category label.");
+ const values=raw.map(Number);if(values.some(x=>!Number.isFinite(x)||x<0))throw Error("Values must be non-negative numbers.");
+ const title=$("chartName").value.trim();if(!title)throw Error("Enter a chart title.");
+ return {type:activeChartKey,title,context:$("chartContext").value.trim(),labels,values};
+}
+function updatePreview(){try{const c=readChartForm();setChartError("");if(editorChart)editorChart.destroy();editorChart=new Chart($("chartCanvas"),chartConfig(c));}catch(e){setChartError(e.message);if(editorChart){editorChart.destroy();editorChart=null;}}}
+function openChartEditor(key){if(!chartInfo[key])return;activeChartKey=key;$("chartTitle").textContent=chartInfo[key].title+" chart";$("chartName").value=chartInfo[key].title+" — ";$("chartContext").value="";$("chartLabels").value="Category A, Category B, Category C";$("chartValues").value="60, 30, 10";setChartError("");$("chartDialog").hidden=false;updatePreview();}
+document.querySelectorAll(".chart-tool").forEach(b=>b.addEventListener("click",()=>openChartEditor(b.dataset.chart)));
+["chartName","chartContext","chartLabels","chartValues"].forEach(id=>$(id).addEventListener("input",updatePreview));
+function closeDialog(d){d.hidden=true;if(d===$("chartDialog")&&editorChart){editorChart.destroy();editorChart=null;}}
+document.querySelectorAll(".dialog-close").forEach(b=>b.addEventListener("click",()=>closeDialog(b.closest(".dialog"))));
+document.querySelectorAll(".dialog").forEach(d=>d.addEventListener("click",e=>{if(e.target===d)closeDialog(d);}));
+$("sendChartButton").addEventListener("click",()=>{
+ if(!peer.isConnected()){setChartError("Connect to your peer before sending a chart.");return;}
+ let chart;try{chart=readChartForm();}catch(e){setChartError(e.message);return;}
+ const m={kind:"risk-chart",chart,caption:composeText.value.trim(),timestamp:Date.now()};
+ try{peer.sendMessage(JSON.stringify(m));messages.push({...m,mine:true});composeText.value="";composerOpen=false;closeDialog($("chartDialog"));render();}catch(e){setChartError(e.message||"Chart could not be sent.");}
 });
-function renderConnectionCode(){
- qr.replaceChildren();
- if(localCode&&typeof QRCode!=="undefined"){
-  new QRCode(qr,{text:localCode,width:260,height:260,correctLevel:QRCode.CorrectLevel.L});
- }
- $("copyCode").textContent=stage==="answer"?"Copy Answer":"Copy Request";
- paste.hidden=stage==="answer";
- $("copyCode").hidden=!localCode;
-}
-$("copyCode").addEventListener("click",async()=>{
- try{await navigator.clipboard.writeText(localCode);$("copyCode").textContent="Copied";}
- catch{setError("Clipboard unavailable. Copy the connection code manually.");}
-});
-async function processPaste(){
- const value=paste.value.trim();if(!value)return;
- try{await peer.processCode(value,stage);paste.value="";setError("");}
- catch(error){setError(error.message||"Could not process connection code.");}
-}
-paste.addEventListener("paste",()=>setTimeout(processPaste,100));
-paste.addEventListener("input",()=>{if(paste.value.trim().endsWith("}"))processPaste();});
-composeButton.addEventListener("click",()=>{composerOpen=true;setError("");render();composeText.focus();});
-cancelButton.addEventListener("click",()=>{composerOpen=false;render();});
-function sendMessage(){
- const text=composeText.value.trim();if(!text)return;
- if(!peer.isConnected()){setError("The peer is not connected.");return;}
- const timestamp=Date.now();
- try{
-  peer.sendMessage(JSON.stringify({kind:"chat-message",text,timestamp}));
-  messages.push({text,timestamp,mine:true});composeText.value="";composerOpen=false;setError("");render();
- }catch(error){setError(error.message||"Message could not be sent.");}
-}
-composeSend.addEventListener("click",sendMessage);
-composeText.addEventListener("keydown",event=>{if(event.key==="Enter"&&(event.ctrlKey||event.metaKey)){event.preventDefault();sendMessage();}});
-
-function openChart(key){
- const info=chartInfo[key];if(!info)return;
- activeChart=key;$("chartTitle").textContent=info.title;$("chartDialog").hidden=false;
- if(chartInstance)chartInstance.destroy();
- const configs={
-  avoidance:{type:"radar",data:{labels:["Exposure 1","Exposure 2","Exposure 3"],datasets:[{label:"Exposure",data:[1,10,5]}]}},
-  lossPrevention:{type:"bar",data:{labels:["Driver training","No alcohol/drugs","Safety rules"],datasets:[{label:"Before",data:[40,100,30]},{label:"After",data:[20,50,10]}]}},
-  lossReduction:{type:"doughnut",data:{labels:["Damage from fire","Sprinklers","First aid","Fire service"],datasets:[{data:[1,40,30,29]}]}},
-  duplication:{type:"scatter",data:{datasets:[{label:"Backup availability",data:[{x:10,y:20},{x:15,y:20},{x:50,y:40}]}]}},
-  separation:{type:"bar",data:{labels:["January","February","March"],datasets:[{label:"Part 1",data:[40,100,30]},{label:"Part 2",data:[20,50,10]}]},options:{scales:{x:{stacked:true},y:{stacked:true}}}},
-  diversification:{type:"bubble",data:{datasets:[{label:"Stocks",data:[{x:20,y:10,r:5},{x:22,y:12,r:4}]},{label:"Bonds",data:[{x:50,y:40,r:2},{x:60,y:22,r:3}]}]}}
- };
- chartInstance=new Chart($("chartCanvas"),{...configs[key],options:{responsive:true,maintainAspectRatio:false,...configs[key].options}});
-}
-document.querySelectorAll(".chart-tool").forEach(button=>button.addEventListener("click",()=>openChart(button.dataset.chart)));
-function closeDialog(dialog){dialog.hidden=true;if(dialog===$("chartDialog")&&chartInstance){chartInstance.destroy();chartInstance=null;}}
-document.querySelectorAll(".dialog-close").forEach(button=>button.addEventListener("click",()=>closeDialog(button.closest(".dialog"))));
-document.querySelectorAll(".dialog").forEach(dialog=>dialog.addEventListener("click",event=>{if(event.target===dialog)closeDialog(dialog);}));
-$("helpButton").addEventListener("click",()=>{
- const list=$("chartDescriptions");list.replaceChildren();
- for(const info of Object.values(chartInfo)){
-  const article=document.createElement("article"),heading=document.createElement("h3"),paragraph=document.createElement("p");
-  heading.textContent=info.title;paragraph.textContent=info.description;article.append(heading,paragraph);list.append(article);
- }
- $("helpDialog").hidden=false;
-});
-document.addEventListener("keydown",event=>{if(event.key==="Escape")document.querySelectorAll(".dialog").forEach(dialog=>closeDialog(dialog));});
-$("versionButton").addEventListener("click",()=>{$("versionPanel").hidden=!$("versionPanel").hidden;});
-$("closeVersionPanel").addEventListener("click",()=>$("versionPanel").hidden=true);
-function download(data,name){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);}
+$("helpButton").addEventListener("click",()=>{const list=$("chartDescriptions");list.replaceChildren();for(const info of Object.values(chartInfo)){const a=document.createElement("article"),h=document.createElement("h3"),p=document.createElement("p");h.textContent=info.title;p.textContent=info.description;a.append(h,p);list.append(a);} $("helpDialog").hidden=false;});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".dialog").forEach(closeDialog);});
+$("versionButton").addEventListener("click",()=>{$("versionPanel").hidden=!$("versionPanel").hidden;});$("closeVersionPanel").addEventListener("click",()=>$("versionPanel").hidden=true);
+function download(data,name){const u=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"})),a=document.createElement("a");a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);}
 function renderVersions(){const list=$("versionsList");list.replaceChildren();versions.forEach(v=>{const row=document.createElement("div");row.className="version-entry";row.textContent=v.name+" · "+new Date(v.savedAt).toLocaleString();list.append(row);});}
 $("saveVersionButton").addEventListener("click",()=>{versions.unshift({name:"Version "+(versions.length+1),savedAt:new Date().toISOString(),messages:messages.map(m=>({...m}))});renderVersions();});
-$("exportChatsButton").addEventListener("click",()=>download({format:"hm-account-chat",version:1,messages},"hm-account-chats.json"));
+$("exportChatsButton").addEventListener("click",()=>download({format:"hm-account-chat",version:2,messages},"hm-account-chats.json"));
 $("importChatsButton").addEventListener("click",()=>$("chatFile").click());
-$("chatFile").addEventListener("change",async event=>{const file=event.target.files?.[0];if(!file)return;try{const data=JSON.parse(await file.text());if(!Array.isArray(data.messages))throw new Error("Invalid backup file.");messages=data.messages.filter(m=>m&&typeof m.text==="string").map(m=>({text:m.text,mine:!!m.mine,timestamp:Number(m.timestamp)||Date.now()}));renderMessages();setError("");}catch(error){setError("Could not import: "+error.message);}finally{event.target.value="";}});
-render();
-peer.createOffer();
+$("chatFile").addEventListener("change",async e=>{const f=e.target.files?.[0];if(!f)return;try{const d=JSON.parse(await f.text());if(!Array.isArray(d.messages))throw Error("Invalid backup file.");messages=d.messages.filter(m=>m&&((m.kind==="risk-chart"&&m.chart&&Array.isArray(m.chart.labels)&&Array.isArray(m.chart.values))||typeof m.text==="string")).map(m=>({...m,mine:!!m.mine,timestamp:Number(m.timestamp)||Date.now()}));renderMessages();setError("");}catch(err){setError("Could not import: "+err.message);}finally{e.target.value="";}});
+render();peer.createOffer();
