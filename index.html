@@ -5,16 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#ffffff">
   <title>HM Account</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@codedgar/puppertino@2.0.0/dist/css/puppertino.min.css">
   <link rel="stylesheet" href="./style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 </head>
-<body>
+<body class="p-type p-auto-dark-mode">
 <main id="app">
   <section id="setupView" class="setup-view">
     <p class="muted">Connect directly to another person.</p>
     <div id="qrCode" class="qr-code"></div>
-    <button id="copyCode" class="primary-button" type="button">Copy Request</button>
+    <button id="copyCode" class="p-button p-button-primary" type="button">Copy Request</button>
     
     <label class="sr-only" for="pasteCode">Paste connection code</label>
     <textarea id="pasteCode" placeholder="Paste connection code…" rows="3"></textarea>
@@ -57,7 +58,7 @@
   </nav>
 
   <section id="helpDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
-    <div class="dialog-card"><header><h2 id="helpTitle">Risk management charts</h2><button class="icon-button dialog-close" type="button" aria-label="Close">×</button></header><div id="chartDescriptions" class="descriptions"></div></div>
+    <div class="dialog-card"><header><h2 id="helpTitle">Risk management charts</h2><button class="p-button p-button-secondary dialog-close" type="button" aria-label="Close">Close</button></header><div id="chartDescriptions" class="descriptions"></div></div>
   </section>
 
 </main>
