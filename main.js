@@ -61,7 +61,8 @@ function renderChatList(){
   const open=()=>{syncActiveChat();activeChatId=c.id;messages=c.messages||[];chatStarted=true;composerOpen=false;pendingCharts=[];setVisible($("chatMenu"),false);setError("");render();};
   row.addEventListener("click",open);
   row.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();open();}});
-  row.append(icon,title,edit,remove);list.append(row);
+  const actions=document.createElement("div");actions.className="chat-row-actions";actions.append(edit,remove);
+  row.append(icon,title,actions);list.append(row);
  });
 }
 function render(){
@@ -214,18 +215,14 @@ $("loadChatFile").addEventListener("change",async e=>{
 });
 $("saveChatButton").addEventListener("click",()=>{syncActiveChat();const data={format:"hm-account-chat",version:4,activeChatId,chats};const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="hm-account-chats.json";a.click();URL.revokeObjectURL(url);});
 
-composeButton.addEventListener("click",()=>{
+composeButton.addEventListener("click",event=>{
+ event.preventDefault();event.stopPropagation();
  if(!composerOpen){composerOpen=true;setError("");render();return;}
  if(!pendingCharts.length){setError("Add at least one chart before sending.");return;}
  if(!peer.isConnected()){setError("The peer data channel is not open. Reconnect before sending.");return;}
- const invalid=pendingCharts.find(chart=>chartValidationError(chart));
- if(invalid){setError(chartValidationError(invalid));return;}
- const message={kind:"risk-chart",charts:pendingCharts.map(chart=>({...chart,config:JSON.parse(JSON.stringify(chart.config))})),timestamp:Date.now()};
- try{
-  peer.sendMessage(JSON.stringify(message));
-  messages.push({...message,mine:true});
-  pendingCharts=[];composerOpen=false;setError("");render();
- }catch(error){setError("Could not send charts: "+(error?.message||"The connection failed."));}
+ const invalid=pendingCharts.find(chart=>chartValidationError(chart));if(invalid){setError(chartValidationError(invalid));return;}
+ try{const message={kind:"risk-chart",charts:pendingCharts.map(chart=>({...chart,config:JSON.parse(JSON.stringify(chart.config))})),timestamp:Date.now()};peer.sendMessage(JSON.stringify(message));messages.push({...message,mine:true});pendingCharts=[];composerOpen=false;setError("");render();setError("Charts sent.");window.setTimeout(()=>{if($("workspaceError").textContent==="Charts sent.")setError("");},2200);}
+ catch(error){setError("Could not send charts: "+(error?.message||"The connection failed."));}
 });
 $("composeView").addEventListener("click",event=>{
  const button=event.target.closest("[data-chart]");
