@@ -29,8 +29,8 @@ function chatId(){return "chat-"+Date.now()+"-"+Math.random().toString(36).slice
 function activeChat(){return chats.find(c=>c.id===activeChatId)||null;}
 function syncActiveChat(){const c=activeChat();if(c)c.messages=messages;}
 function startNewChat(){syncActiveChat();const c={id:chatId(),title:"New chat",createdAt:Date.now(),messages:[]};chats.unshift(c);activeChatId=c.id;messages=c.messages;chatStarted=true;composerOpen=false;pendingCharts=[];setError("");render();}
-function renderChatList(){const list=$("chatList");list.replaceChildren();chats.forEach(c=>{const b=document.createElement("button");b.type="button";b.className="chat-list-item"+(c.id===activeChatId?" active":"");const first=c.messages?.find(m=>m.kind==="text"&&m.text)||c.messages?.find(m=>m.kind==="risk-chart");b.textContent=first?.kind==="text"?first.text.slice(0,34):(first?.charts?.[0]?.title||first?.chart?.title||"New chat");b.title=b.textContent;b.addEventListener("click",()=>{syncActiveChat();activeChatId=c.id;messages=c.messages||[];chatStarted=true;composerOpen=false;pendingCharts=[];$("chatMenu").hidden=true;render();});list.append(b);});}
-function render(){setup.hidden=connected;choice.hidden=!connected||chatStarted;$("topbar").hidden=!connected||!chatStarted;$("toolbar").hidden=!connected||!chatStarted;chat.hidden=!connected||!chatStarted;composeView.hidden=!composerOpen;$("cancelComposeButton").hidden=!composerOpen;composeButton.hidden=!connected||!chatStarted;composeButton.innerHTML=composerOpen?'<svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>':'<svg viewBox="0 0 24 24"><path d="m4 20 4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.5 6.5 3 3"/></svg>';composeButton.setAttribute("aria-label",composerOpen?"Send chart message":"Compose chart message");composeButton.title=composerOpen?"Send chart message":"Compose chart message";renderChatList();renderPendingCharts();renderMessages();}
+function renderChatList(){const list=$("chatList");list.replaceChildren();chats.forEach(c=>{const row=document.createElement("div");row.className="chat-list-item"+(c.id===activeChatId?" active":"");const label=document.createElement("button");label.type="button";label.className="chat-list-name";const first=c.messages?.find(m=>m.kind==="text"&&m.text)||c.messages?.find(m=>m.kind==="risk-chart");label.textContent=c.title||(first?.kind==="text"?first.text.slice(0,34):(first?.charts?.[0]?.title||first?.chart?.title||"New chat"));label.title=label.textContent;label.addEventListener("click",()=>{syncActiveChat();activeChatId=c.id;messages=c.messages||[];chatStarted=true;composerOpen=false;pendingCharts=[];$("chatMenu").hidden=true;render();});const edit=document.createElement("button");edit.type="button";edit.className="chat-list-action";edit.title="Rename chat";edit.setAttribute("aria-label","Rename chat");edit.innerHTML='<svg viewBox="0 0 24 24"><path d="m4 16-.8 4.8L8 20l11-11-4-4z"/><path d="m13.5 6.5 4 4"/></svg>';edit.addEventListener("click",()=>{const next=prompt("Chat name",c.title||label.textContent);if(next!==null&&next.trim()){c.title=next.trim();renderChatList();}});const remove=document.createElement("button");remove.type="button";remove.className="chat-list-action";remove.title="Remove chat";remove.setAttribute("aria-label","Remove chat");remove.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 7h16M10 11v6m4-6v6M5 7l1 14h12l1-14M9 7V4h6v3"/></svg>';remove.addEventListener("click",()=>{if(!confirm("Remove this chat?"))return;const index=chats.findIndex(x=>x.id===c.id);chats.splice(index,1);if(activeChatId===c.id){const next=chats[0];activeChatId=next?.id||null;messages=next?.messages||[];if(!next)startNewChat();}render();});row.append(label,edit,remove);list.append(row);});}
+function render(){setup.hidden=connected;$("topbar").hidden=!connected||!chatStarted;$("toolbar").hidden=!connected||!chatStarted;chat.hidden=!connected||!chatStarted;composeView.hidden=!composerOpen;$("cancelComposeButton").hidden=!composerOpen;composeButton.hidden=!connected||!chatStarted;composeButton.innerHTML=composerOpen?'<svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>':'<svg viewBox="0 0 24 24"><path d="m4 20 4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.5 6.5 3 3"/></svg>';composeButton.setAttribute("aria-label",composerOpen?"Send chart message":"Compose chart message");composeButton.title=composerOpen?"Send chart message":"Compose chart message";renderChatList();renderPendingCharts();renderMessages();}
 function renderPendingCharts(){
  while(pendingChartInstances.length)pendingChartInstances.pop().destroy();const holder=$("pendingCharts");holder.replaceChildren();
  pendingCharts.forEach((c,i)=>{
@@ -51,7 +51,7 @@ function renderPendingCharts(){
    ds.data.forEach((point,pi)=>{const row=document.createElement("div");row.className="chart-data-row duplication-row";row.append(field(point.category,"Duplicate "+(pi+1),v=>{point.category=v;update();}),field(point.x,"X value",v=>{point.x=v;update();},"number"),field(point.y,"Y value",v=>{point.y=v;update();},"number"),action("×","Remove row",ds.data.length<=1,()=>{ds.data.splice(pi,1);renderPendingCharts();}));rows.append(row);});
    rows.append(action("+","Add duplicate",false,()=>{ds.data.push({x:null,y:null,category:""});renderPendingCharts();}));editor.append(rows);
   }else if(c.type==="diversification"){
-   datasets.forEach((ds,di)=>{const section=document.createElement("section");section.className="chart-series";section.append(field(ds.label,"Series "+(di+1),v=>{ds.label=v;update();}));const rows=document.createElement("div");rows.className="chart-data-rows";const head=document.createElement("div");head.className="chart-data-row chart-data-row-head";["X value","Y value","Size"," "].forEach(t=>{const span=document.createElement("span");span.textContent=t;head.append(span);});rows.append(head);ds.data.forEach((point,pi)=>{const row=document.createElement("div");row.className="chart-data-row";["x","y","r"].forEach(k=>row.append(field(point[k],k==="r"?"Size":k.toUpperCase(),v=>{point[k]=v;update();},"number")));row.append(action("×","Remove point",ds.data.length<=1,()=>{ds.data.splice(pi,1);renderPendingCharts();}));rows.append(row);});section.append(rows);editor.append(section);});
+   datasets.forEach((ds,di)=>{const section=document.createElement("section");section.className="chart-series";section.append(field(ds.label,"Series "+(di+1),v=>{ds.label=v;update();}));section.append(action("×","Remove series",datasets.length<=1,()=>{datasets.splice(di,1);renderPendingCharts();}));const rows=document.createElement("div");rows.className="chart-data-rows";const head=document.createElement("div");head.className="chart-data-row chart-data-row-head";["X value","Y value","Size"," "].forEach(t=>{const span=document.createElement("span");span.textContent=t;head.append(span);});rows.append(head);ds.data.forEach((point,pi)=>{const row=document.createElement("div");row.className="chart-data-row";["x","y","r"].forEach(k=>row.append(field(point[k],k==="r"?"Size":k.toUpperCase(),v=>{point[k]=v;update();},"number")));row.append(action("×","Remove point",ds.data.length<=1,()=>{ds.data.splice(pi,1);renderPendingCharts();}));rows.append(row);});section.append(rows);editor.append(section);});
    editor.append(action("+","Add series",false,()=>{datasets.push({label:"",data:[{x:null,y:null,r:null}],backgroundColor:["#1769e0","#69a98b","#e8b65b","#a58bd4"][datasets.length%4]});renderPendingCharts();}));
   }
   card.append(top,title,editor,status,preview);holder.append(card);update();
@@ -59,7 +59,7 @@ function renderPendingCharts(){
 }
 function addChartToCompose(key){
  if(!chartInfo[key])return;
- pendingCharts.push({type:key,title:"",config:helpExampleConfig(key)});
+ pendingCharts.push({type:key,title:"",config:composerChartConfig(key)});
  renderPendingCharts();
 }
 function renderMessages(){
@@ -99,8 +99,8 @@ peer=createP2P({
  onLocalCode:(code,type)=>{localCode=code;stage=type;renderConnectionCode();},
  onConnectionState:s=>{
   const was=connected;connected=s.connected;
-  if(connected&&!was){chatStarted=false;composerOpen=false;pendingCharts=[];}
-  if(!connected){chatStarted=false;composerOpen=false;}
+  if(connected&&!was){chatStarted=false;composerOpen=false;pendingCharts=[];startNewChat();}
+  if(!connected){chatStarted=false;composerOpen=false;$("chatMenu").hidden=true;}
   render();
  },
  onError:setError
@@ -136,12 +136,11 @@ async function processPaste(){
 paste.addEventListener("paste",()=>setTimeout(processPaste,100));
 paste.addEventListener("input",()=>{if(paste.value.trim().endsWith("}"))processPaste();});
 
-$("newChatButton").addEventListener("click",startNewChat);
 $("newChatTopButton").addEventListener("click",startNewChat);
+$("openChatButton").addEventListener("click",()=>$("loadChatFile").click());
 $("chatMenuButton").addEventListener("click",()=>{$("chatMenu").hidden=!$("chatMenu").hidden;});
 document.addEventListener("click",e=>{if(!$("chatMenu").contains(e.target)&&!$("chatMenuButton").contains(e.target))$("chatMenu").hidden=true;});
-$("cancelComposeButton").addEventListener("click",()=>{composerOpen=false;pendingCharts=[];setError("");render();});
-$("loadChatButton").addEventListener("click",()=>$("loadChatFile").click());
+$("cancelComposeButton").addEventListener("click",()=>{composerOpen=false;setError("");render();});
 $("loadChatFile").addEventListener("change",async e=>{
  const file=e.target.files?.[0];if(!file)return;
  try{
@@ -171,16 +170,25 @@ document.querySelectorAll(".chart-tool").forEach(b=>b.addEventListener("click",(
 function closeDialog(d){d.hidden=true;if(d===$("helpDialog"))while(helpCharts.length)helpCharts.pop().destroy();}
 document.querySelectorAll(".dialog-close").forEach(b=>b.addEventListener("click",()=>closeDialog(b.closest(".dialog"))));
 document.querySelectorAll(".dialog").forEach(d=>d.addEventListener("click",e=>{if(e.target===d)closeDialog(d);}));
-function helpExampleConfig(key){
+function composerChartConfig(key){
  const examples={
-  avoidance:{type:"radar",data:{labels:[""],datasets:[{label:"Remaining exposure",data:[null],backgroundColor:"rgba(23,105,224,.2)",borderColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false}},
+  avoidance:{type:"radar",data:{labels:["","",""],datasets:[{label:"Remaining exposure",data:[null,null,null],backgroundColor:"rgba(23,105,224,.2)",borderColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false}},
   lossPrevention:{type:"bar",data:{labels:[""],datasets:[{label:"Before",data:[null],backgroundColor:"#9bbce9"},{label:"After",data:[null],backgroundColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false}},
-  lossReduction:{type:"doughnut",data:{labels:[""],datasets:[{label:"Loss reduction",data:[null],backgroundColor:["#d65a5a"]}]},options:{responsive:true,maintainAspectRatio:false}},
+  lossReduction:{type:"doughnut",data:{labels:["",""],datasets:[{label:"Loss reduction",data:[null,null],backgroundColor:["#d65a5a","#1769e0"]}]},options:{responsive:true,maintainAspectRatio:false}},
   duplication:{type:"scatter",data:{datasets:[{label:"",data:[{x:null,y:null,category:""}],backgroundColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:ctx=>ctx.raw.category||("("+ctx.raw.x+", "+ctx.raw.y+")")}}},scales:{x:{title:{display:true,text:"X value"}},y:{title:{display:true,text:"Y value"}}}}},
   separation:{type:"bar",data:{labels:[""],datasets:[{label:"Section 1",data:[null],backgroundColor:"#1769e0"},{label:"Section 2",data:[null],backgroundColor:"#8ab2e8"}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}}}},
   diversification:{type:"bubble",data:{datasets:[{label:"",data:[{x:null,y:null,r:null}],backgroundColor:"#1769e0"},{label:"",data:[{x:null,y:null,r:null}],backgroundColor:"#69a98b"}]},options:{responsive:true,maintainAspectRatio:false}}
- };
- return examples[key];
+ };return examples[key];
+}
+function helpExampleConfig(key){
+ const examples={
+  avoidance:{type:"radar",data:{labels:["No flood exposure","No hazardous stock","Safe location"],datasets:[{label:"Exposure eliminated",data:[90,75,85],backgroundColor:"rgba(23,105,224,.2)",borderColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{beginAtZero:true,max:100}}}},
+  lossPrevention:{type:"line",data:{labels:["Before training","Month 1","Month 2","Month 3"],datasets:[{label:"Accidents",data:[18,13,9,5],borderColor:"#1769e0",backgroundColor:"#9bbce9",tension:.25}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}},
+  lossReduction:{type:"bar",data:{labels:["No protection","Sprinklers","First aid","Emergency team"],datasets:[{label:"Average loss severity",data:[100,55,72,40],backgroundColor:["#d65a5a","#1769e0","#4f9b78","#e8b65b"]}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}},
+  duplication:{type:"doughnut",data:{labels:["Primary records","Backup copy","Off-site copy"],datasets:[{label:"Records available",data:[50,30,20],backgroundColor:["#1769e0","#69a98b","#e8b65b"]}]},options:{responsive:true,maintainAspectRatio:false}},
+  separation:{type:"polarArea",data:{labels:["Building A","Building B","Building C","Remote storage"],datasets:[{label:"Assets distributed",data:[35,25,20,20],backgroundColor:["#1769e0","#69a98b","#e8b65b","#a58bd4"]}]},options:{responsive:true,maintainAspectRatio:false}},
+  diversification:{type:"pie",data:{labels:["Supplier A","Supplier B","Supplier C","Supplier D"],datasets:[{label:"Supply share",data:[35,30,20,15],backgroundColor:["#1769e0","#69a98b","#e8b65b","#a58bd4"]}]},options:{responsive:true,maintainAspectRatio:false}}
+ };return examples[key];
 }
 $("helpButton").addEventListener("click",()=>{
  const list=$("chartDescriptions");list.replaceChildren();
