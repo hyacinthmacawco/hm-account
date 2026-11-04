@@ -4,18 +4,18 @@ const setup=$("setupView"),chat=$("chat"),qr=$("qrCode"),paste=$("pasteCode"),me
 let connected=false,localCode="",stage="offer",composerOpen=false,messages=[],versions=[],peer,editorChart=null,activeChartKey=null;
 const renderedCharts=[];
 const chartInfo={
- avoidance:{title:"Avoidance",description:"Avoidance means not undertaking or abandoning a loss exposure. Examples include locating a facility outside a flood zone or withdrawing a product with dangerous side effects. It eliminates the exposure where feasible.",style:"bar",axis:"x"},
- lossPrevention:{title:"Loss prevention",description:"Loss prevention reduces the frequency of a particular loss. Examples include driver training, prohibiting alcohol or drug use while driving, and enforcing safety rules.",style:"bar"},
- lossReduction:{title:"Loss reduction",description:"Loss reduction reduces the severity of a loss after it occurs. Examples include automatic sprinklers, first-aid equipment, and emergency response procedures.",style:"line"},
+ avoidance:{title:"Avoidance",description:"Avoidance means not undertaking or abandoning a loss exposure. Examples include locating a facility outside a flood zone or withdrawing a product with dangerous side effects. It eliminates the exposure where feasible.",style:"radar"},
+ lossPrevention:{title:"Loss prevention",description:"Loss prevention reduces the frequency of a particular loss. Examples include driver training, prohibiting alcohol or drug use while driving, and enforcing safety rules.",style:"line"},
+ lossReduction:{title:"Loss reduction",description:"Loss reduction reduces the severity of a loss after it occurs. Examples include automatic sprinklers, first-aid equipment, and emergency response procedures.",style:"bar"},
  duplication:{title:"Duplication",description:"Duplication keeps backups or copies of important property or information available if the original is lost. Examples include spare tires and duplicate business records.",style:"doughnut"},
- separation:{title:"Separation",description:"Separation divides assets exposed to loss so one event cannot damage everything at once. For example, fire-resistant factory sections can prevent a fire spreading throughout a facility.",style:"bar"},
+ separation:{title:"Separation",description:"Separation divides assets exposed to loss so one event cannot damage everything at once. For example, fire-resistant factory sections can prevent a fire spreading throughout a facility.",style:"polarArea"},
  diversification:{title:"Diversification",description:"Diversification spreads exposure across different parties, securities, suppliers, or transactions. Using several suppliers reduces dependence on one supplier.",style:"pie"}
 };
 function setError(v=""){errorEl.textContent=v;}
 function setChartError(v=""){$("chartError").textContent=v;}
 function chartConfig(c){
- const info=chartInfo[c.type]||chartInfo.avoidance,isCircular=info.style==="pie"||info.style==="doughnut";
- return {type:info.style,data:{labels:c.labels,datasets:[{label:c.title||info.title,data:c.values,borderWidth:2,tension:.25,backgroundColor:isCircular?["#1769e0","#4f9bd9","#75b99b","#e8b65b","#a58bd4","#e58b8b"]:"rgba(23,105,224,.65)",borderColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:isCircular}},...(info.style==="bar"&&info.axis==="x"?{indexAxis:"y"}:{}),scales:isCircular?{}:{y:{beginAtZero:true}}}};
+ const info=chartInfo[c.type]||chartInfo.avoidance,isCircular=["pie","doughnut","polarArea","radar"].includes(info.style);
+ return {type:info.style,data:{labels:c.labels,datasets:[{label:c.title||info.title,data:c.values,borderWidth:2,tension:.25,backgroundColor:isCircular?["#1769e0","#4f9bd9","#75b99b","#e8b65b","#a58bd4","#e58b8b"]:"rgba(23,105,224,.65)",borderColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:isCircular}},scales:isCircular?{}:{y:{beginAtZero:true}}}};
 }
 function render(){setup.hidden=connected;chat.hidden=!connected;composeView.hidden=!composerOpen;$("versionButton").hidden=composerOpen;composeButton.hidden=composerOpen;cancelButton.hidden=!composerOpen;$("connectionStatus").textContent=connected?"Connected":"Connecting…";renderMessages();}
 function renderMessages(){
