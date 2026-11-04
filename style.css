@@ -597,7 +597,7 @@ textarea {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
-  justify-content: flex-end !important;
+  justify-content: space-between !important;
   gap: 12px !important;
   width: 100% !important;
   height: auto !important;
@@ -678,4 +678,17 @@ textarea {
   box-shadow: 0 4px 18px rgba(0,0,0,.18) !important;
   overflow-wrap: anywhere !important;
   pointer-events: none !important;
+}
+
+
+/* Keep the toolbar hidden during connection/setup, despite its fixed flex layout. */
+#toolbar.p-toolbar-touch-fixed[hidden] {
+  display: none !important;
+}
+
+/* Keep Cancel at the left edge and Compose/Send at the right edge. */
+#toolbar.p-toolbar-touch-fixed {
+  justify-content: space-between !important;
+  padding-left: max(20px, env(safe-area-inset-left)) !important;
+  padding-right: max(20px, env(safe-area-inset-right)) !important;
 }
