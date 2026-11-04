@@ -161,14 +161,28 @@ function openChartEditor(key){
 }
 document.querySelectorAll(".chart-tool").forEach(b=>b.addEventListener("click",()=>openChartEditor(b.dataset.chart)));
 ["chartName","chartContext","chartLabels","chartValues"].forEach(id=>$(id).addEventListener("input",updatePreview));
+function addCurrentChart(){
+ try{
+  const chart=readChartForm();
+  pendingCharts.push(chart);
+  activeChartKey=null;
+  setChartError("");
+  $("chartDialog").hidden=true;
+  if(editorChart){editorChart.destroy();editorChart=null;}
+  renderPendingCharts();
+ }catch(e){setChartError(e.message);}
+}
+$("addChartButton").addEventListener("click",addCurrentChart);
 function closeDialog(d){
- if(d===$("chartDialog")&&activeChartKey){
-  try{const chart=readChartForm();pendingCharts.push(chart);setChartError("");}
-  catch(e){setChartError(e.message);return;}
-  activeChartKey=null;renderPendingCharts();
- }
  d.hidden=true;
- if(d===$("chartDialog")&&editorChart){editorChart.destroy();editorChart=null;}
+ if(d===$("chartDialog")){
+  activeChartKey=null;
+  setChartError("");
+  if(editorChart){editorChart.destroy();editorChart=null;}
+ }
+ if(d===$("helpDialog")){
+  while(helpCharts.length)helpCharts.pop().destroy();
+ }
 }
 document.querySelectorAll(".dialog-close").forEach(b=>b.addEventListener("click",()=>closeDialog(b.closest(".dialog"))));
 document.querySelectorAll(".dialog").forEach(d=>d.addEventListener("click",e=>{if(e.target===d)closeDialog(d);}));
