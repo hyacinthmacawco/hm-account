@@ -15,6 +15,16 @@ const chartInfo={
  diversification:{title:"Diversification",description:"Diversification spreads exposure across different parties, securities, suppliers, or transactions. Using several suppliers reduces dependence on one supplier.",style:"pie"}
 };
 function setError(v=""){errorEl.textContent=v;}
+function syncChartTheme(){
+ if(typeof Chart==="undefined")return;
+ const styles=getComputedStyle(document.body);
+ const ink=styles.getPropertyValue("--p-text-primary").trim();
+ const separator=styles.getPropertyValue("--p-separator").trim();
+ Chart.defaults.color=ink|| (matchMedia("(prefers-color-scheme: dark)").matches?"#f5f5f5":"#1a1a1a");
+ Chart.defaults.borderColor=separator||(matchMedia("(prefers-color-scheme: dark)").matches?"rgba(255,255,255,.16)":"rgba(0,0,0,.12)");
+ Chart.defaults.scale.grid.color=Chart.defaults.borderColor;
+}
+
 function legacyChartConfig(c){
  const info=chartInfo[c.type]||chartInfo.avoidance;
  const circular=["pie","doughnut","polarArea","radar"].includes(info.style);
@@ -44,7 +54,7 @@ function renderChatList(){
   row.append(label,edit,remove);list.append(row);
  });
 }
-function render(){setup.hidden=connected;$("topbar").hidden=!connected||!chatStarted;$("workspace").hidden=!connected||!chatStarted;$("toolbar").hidden=!connected||!chatStarted;chat.hidden=!connected||!chatStarted||composerOpen;composeView.hidden=!composerOpen;$("cancelComposeButton").hidden=!composerOpen;composeButton.hidden=!connected||!chatStarted;composeButton.innerHTML=composerOpen?'<i class="ph-bold ph-paper-plane-tilt" aria-hidden="true"></i>':'<i class="ph-bold ph-pencil-simple" aria-hidden="true"></i>';composeButton.setAttribute("aria-label",composerOpen?"Send chart message":"Compose chart message");composeButton.title=composerOpen?"Send chart message":"Compose chart message";renderChatList();renderPendingCharts();renderMessages();}
+function render(){syncChartTheme();setup.hidden=connected;$("topbar").hidden=!connected||!chatStarted;$("workspace").hidden=!connected||!chatStarted;$("toolbar").hidden=!connected||!chatStarted;chat.hidden=!connected||!chatStarted||composerOpen;composeView.hidden=!composerOpen;$("cancelComposeButton").hidden=!composerOpen;composeButton.hidden=!connected||!chatStarted;composeButton.innerHTML=composerOpen?'<i class="ph-bold ph-paper-plane-tilt" aria-hidden="true"></i>':'<i class="ph-bold ph-pencil-simple" aria-hidden="true"></i>';composeButton.setAttribute("aria-label",composerOpen?"Send chart message":"Compose chart message");composeButton.title=composerOpen?"Send chart message":"Compose chart message";renderChatList();renderPendingCharts();renderMessages();}
 function chartValidationError(chart){
  const data=chart?.config?.data;const datasets=data?.datasets||[];
  if(!datasets.length)return "Add at least one data series.";
@@ -239,3 +249,7 @@ $("helpButton").addEventListener("click",()=>{
 render();
 if(typeof RTCPeerConnection==="undefined"){setError("WebRTC is not supported in this browser.");}
 else peer.createOffer();
+if(typeof matchMedia==="function"){
+ const appearance=matchMedia("(prefers-color-scheme: dark)");
+ appearance.addEventListener?.("change",()=>{syncChartTheme();renderMessages();});
+}
