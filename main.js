@@ -22,7 +22,7 @@ function syncChartTheme(){
  const separator=styles.getPropertyValue("--p-separator").trim();
  Chart.defaults.color=ink|| (matchMedia("(prefers-color-scheme: dark)").matches?"#f5f5f5":"#1a1a1a");
  Chart.defaults.borderColor=separator||(matchMedia("(prefers-color-scheme: dark)").matches?"rgba(255,255,255,.16)":"rgba(0,0,0,.12)");
- Chart.defaults.scale.grid.color=Chart.defaults.borderColor;
+ if(Chart.defaults.scale?.grid)Chart.defaults.scale.grid.color=Chart.defaults.borderColor;
 }
 
 function legacyChartConfig(c){
@@ -43,7 +43,7 @@ function renderChatList(){
  const list=$("chatList");list.replaceChildren();
  chats.forEach(c=>{
   const row=document.createElement("li");row.className="p-list-row";
-  const label=document.createElement("button");label.type="button";label.className="p-button p-button-touch p-button-borderless";
+  const label=document.createElement("button");label.type="button";label.className="p-list-title";
   const first=c.messages?.find(m=>(m.kind==="text"||m.kind==="chat-message")&&m.text)||c.messages?.find(m=>m.kind==="risk-chart");
   label.textContent=c.title||(first?.kind==="text"?first.text.slice(0,34):(first?.charts?.[0]?.title||first?.chart?.title||"New chat"));label.title=label.textContent;
   label.addEventListener("click",()=>{syncActiveChat();activeChatId=c.id;messages=c.messages||[];chatStarted=true;composerOpen=false;pendingCharts=[];$("chatMenu").hidden=true;render();});
@@ -69,7 +69,7 @@ function chartValidationError(chart){
 function renderPendingCharts(){
  while(pendingChartInstances.length)pendingChartInstances.pop().destroy();const holder=$("pendingCharts");holder.replaceChildren();
  pendingCharts.forEach((c,i)=>{
-  const card=document.createElement("li");card.className="p-list-row";const top=document.createElement("div");top.className="p-list-label";const name=document.createElement("strong");name.textContent=chartInfo[c.type].title+(c.title?" — "+c.title:"");const actions=document.createElement("div");actions.className="p-toolbar-touch";
+  const card=document.createElement("li");card.className="p-list-row";const top=document.createElement("div");top.className="p-list-label";const name=document.createElement("strong");name.textContent=chartInfo[c.type].title+(c.title?" — "+c.title:"");const actions=document.createElement("div");actions.className="p-container";
   const action=(symbol,label,disabled,fn)=>{const icons={"Move up":"ph-arrow-up","Move down":"ph-arrow-down","Remove chart":"ph-trash","Remove row":"ph-trash","Remove point":"ph-trash","Add row":"ph-plus","Add duplicate":"ph-plus","Remove series":"ph-trash","Add series":"ph-plus"};const b=document.createElement("button");b.type="button";b.className="p-button p-button-touch p-button-secondary p-button-icon-only";b.innerHTML=`<i class="ph-bold ${icons[label]||"ph-dots-three"}" aria-hidden="true"></i>`;b.title=label;b.setAttribute("aria-label",label);b.disabled=disabled;b.addEventListener("click",fn);return b;};
   actions.append(action("","Move up",i===0,()=>{[pendingCharts[i-1],pendingCharts[i]]=[pendingCharts[i],pendingCharts[i-1]];renderPendingCharts();}),action("","Move down",i===pendingCharts.length-1,()=>{[pendingCharts[i+1],pendingCharts[i]]=[pendingCharts[i],pendingCharts[i+1]];renderPendingCharts();}),action("","Remove chart",false,()=>{pendingCharts.splice(i,1);renderPendingCharts();}));top.append(name,actions);
   const title=document.createElement("input");title.type="text";title.className="p-field p-field-touch p-field-touch-filled";title.maxLength=100;title.placeholder="Chart title";title.value=c.title||"";title.setAttribute("aria-label","Chart title");
@@ -102,7 +102,7 @@ function renderMessages(){
  messagesEl.replaceChildren();
  for(const m of messages){
   const item=document.createElement("li");item.className="p-list-row";
-  const label=document.createElement("div");label.className="p-list-label";const meta=document.createElement("span");meta.className="p-list-subtitle";meta.textContent=new Date(m.timestamp).toLocaleString();label.append(meta);item.append(label);
+  const label=document.createElement("div");label.className="p-list-label";const meta=document.createElement("time");meta.className="p-list-subtitle";meta.dateTime=new Date(m.timestamp).toISOString();meta.textContent=new Date(m.timestamp).toLocaleString();label.append(meta);item.append(label);
   const charts=m.kind==="risk-chart"?(m.charts?.length?m.charts:(m.chart?[m.chart]:[])):(m.kind==="chat-message"&&Array.isArray(m.charts)?m.charts:[]);
   if(m.kind==="chat-message"&&m.text){const body=document.createElement("span");body.className="p-list-title";body.textContent=m.text;label.append(body);}
   if(charts.length){
@@ -172,7 +172,7 @@ async function processPaste(){
 paste.addEventListener("paste",()=>setTimeout(processPaste,100));
 paste.addEventListener("input",()=>{if(paste.value.trim().endsWith("}"))processPaste();});
 
-$("newChatTopButton").addEventListener("click",startNewChat);
+$("newChatTopButton").addEventListener("click",()=>{$("chatMenu").hidden=true;startNewChat();});
 $("openChatButton").addEventListener("click",()=>$("loadChatFile").click());
 $("chatMenuButton").addEventListener("click",()=>{$("chatMenu").hidden=!$("chatMenu").hidden;});
 document.addEventListener("click",e=>{if(!$("chatMenu").contains(e.target)&&!$("chatMenuButton").contains(e.target))$("chatMenu").hidden=true;});
