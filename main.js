@@ -44,7 +44,7 @@ function renderChatList(){
   row.append(label,edit,remove);list.append(row);
  });
 }
-function render(){setup.hidden=connected;$("topbar").hidden=!connected||!chatStarted;$("workspace").hidden=!connected||!chatStarted;$("toolbar").hidden=!connected||!chatStarted;chat.hidden=!connected||!chatStarted;composeView.hidden=!composerOpen;$("cancelComposeButton").hidden=!composerOpen;composeButton.hidden=!connected||!chatStarted;composeButton.innerHTML=composerOpen?'<i class="ph-bold ph-paper-plane-tilt" aria-hidden="true"></i>':'<i class="ph-bold ph-pencil-simple" aria-hidden="true"></i>';composeButton.setAttribute("aria-label",composerOpen?"Send chart message":"Compose chart message");composeButton.title=composerOpen?"Send chart message":"Compose chart message";renderChatList();renderPendingCharts();renderMessages();}
+function render(){setup.hidden=connected;$("topbar").hidden=!connected||!chatStarted;$("workspace").hidden=!connected||!chatStarted;$("toolbar").hidden=!connected||!chatStarted;chat.hidden=!connected||!chatStarted||composerOpen;composeView.hidden=!composerOpen;$("cancelComposeButton").hidden=!composerOpen;composeButton.hidden=!connected||!chatStarted;composeButton.innerHTML=composerOpen?'<i class="ph-bold ph-paper-plane-tilt" aria-hidden="true"></i>':'<i class="ph-bold ph-pencil-simple" aria-hidden="true"></i>';composeButton.setAttribute("aria-label",composerOpen?"Send chart message":"Compose chart message");composeButton.title=composerOpen?"Send chart message":"Compose chart message";renderChatList();renderPendingCharts();renderMessages();}
 function renderPendingCharts(){
  while(pendingChartInstances.length)pendingChartInstances.pop().destroy();const holder=$("pendingCharts");holder.replaceChildren();
  pendingCharts.forEach((c,i)=>{
