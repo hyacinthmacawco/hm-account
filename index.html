@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
   <title>HM Account</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@codedgar/puppertino@2.0.0/dist/css/puppertino-mobile.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@codedgar/puppertino@2.0.0/dist/css/puppertino.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
@@ -47,8 +47,8 @@
       </div>
       <div id="chatList" aria-label="Saved chats"></div>
     </nav>
+    <p id="workspaceError" class="p-list-touch-footer" role="status" aria-live="polite" hidden></p>
     <section id="chat" aria-label="Conversation" hidden>
-      <p id="chatError" class="p-list-touch-footer" role="status" aria-live="polite"></p>
       <ul id="messages" class="p-list p-list-touch" aria-live="polite"></ul>
     </section>
     <section id="composeView" class="p-pane-scroll" hidden>
