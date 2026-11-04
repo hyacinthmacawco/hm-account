@@ -70,7 +70,7 @@ function render(){
  setVisible(setup,!connected);
  setVisible($("topbar"),connected&&chatStarted);
  setVisible($("workspace"),connected&&chatStarted);
- setVisible($("toolbar"),connected&&chatStarted);
+ setVisible($("actionBar"),connected&&chatStarted);
  setVisible(chat,connected&&chatStarted&&!composerOpen);
  setVisible(composeView,connected&&chatStarted&&composerOpen);
  setVisible($("cancelComposeButton"),composerOpen&&connected&&chatStarted);
