@@ -7,61 +7,79 @@
   <title>HM Account</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@codedgar/puppertino@2.0.0/dist/css/puppertino.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
-    <link rel="stylesheet" href="./style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script type="module" src="https://cdn.jsdelivr.net/npm/@codedgar/puppertino@2.0.0/src/js/modals.js"></script>
 </head>
-<body class="p-type p-auto-dark-mode">
+<body class="p-type p-auto-dark-mode" style="--p-color-current:#1769e0">
 <main id="app">
-  <section id="setupView" class="setup-view">
-    <p class="muted">Connect directly to another person.</p>
-    <div id="qrCode" class="qr-code"></div>
-    <button id="copyCode" class="p-button p-button-primary p-button-touch" type="button">Copy Request</button>
-    
-    <label class="sr-only" for="pasteCode">Paste connection code</label>
-    <textarea id="pasteCode" class="p-field p-field-touch" placeholder="Paste connection code…" rows="3"></textarea>
-    <p id="error" class="error" role="status" aria-live="polite"></p>
+  <section id="setupView" class="p-container p-pane-scroll" aria-label="Connect">
+    <p>Connect directly to another person.</p>
+    <div id="qrCode" aria-label="Connection QR code"></div>
+    <button id="copyCode" class="p-button p-button-touch-large p-button-primary" type="button">Copy Request</button>
+    <div class="p-field-group-touch">
+      <label class="p-label" for="pasteCode">Connection code</label>
+      <textarea id="pasteCode" class="p-field p-field-touch" placeholder="Paste connection code…" rows="3"></textarea>
+    </div>
+    <p id="error" role="status" aria-live="polite"></p>
   </section>
 
-  <section id="chat" class="chat-view" hidden>
-    <div id="messages" class="messages" aria-live="polite"></div>
-  </section>
-
-  <section id="composeView" class="compose-view" hidden>
-    <div id="pendingCharts" class="pending-charts" aria-live="polite"></div>
-    <div class="compose-tools">
-      <div class="chart-tools" aria-label="Risk management charts">
-        <button class="chart-tool p-button p-button-secondary p-button-touch" data-chart="avoidance" type="button">Avoidance</button>
-        <button class="chart-tool p-button p-button-secondary p-button-touch" data-chart="lossPrevention" type="button">Loss prevention</button>
-        <button class="chart-tool p-button p-button-secondary p-button-touch" data-chart="lossReduction" type="button">Loss reduction</button>
-        <button class="chart-tool p-button p-button-secondary p-button-touch" data-chart="duplication" type="button">Duplication</button>
-        <button class="chart-tool p-button p-button-secondary p-button-touch" data-chart="separation" type="button">Separation</button>
-        <button class="chart-tool p-button p-button-secondary p-button-touch" data-chart="diversification" type="button">Diversification</button>
+  <header id="topbar" class="p-nav-bar p-nav-bar-filled p-nav-bar-bordered" aria-label="Chat navigation" hidden>
+    <div class="p-nav-bar__row">
+      <div class="p-nav-bar__group">
+        <button id="chatMenuButton" class="p-nav-bar__button" type="button" aria-label="Chats" title="Chats"><i class="ph-bold ph-list" aria-hidden="true"></i></button>
+        <button id="newChatTopButton" class="p-nav-bar__button" type="button" aria-label="New chat" title="New chat"><i class="ph-bold ph-pencil-simple" aria-hidden="true"></i></button>
       </div>
-      <button id="helpButton" class="p-button p-button-secondary p-button-touch" type="button">Chart help</button>
+      <h1 class="p-nav-bar__title">HM Account</h1>
+      <div class="p-nav-bar__group">
+        <button id="openChatButton" class="p-nav-bar__button" type="button" aria-label="Open chat" title="Open chat"><i class="ph-bold ph-folder-open" aria-hidden="true"></i></button>
+        <button id="saveChatButton" class="p-nav-bar__button" type="button" aria-label="Save chats" title="Save chats"><i class="ph-bold ph-floppy-disk" aria-hidden="true"></i></button>
+      </div>
     </div>
+  </header>
+
+  <section id="workspace" class="p-pane-scroll" hidden>
+    <nav id="chatMenu" class="p-sidebar p-sidebar-touch p-sidebar-touch-floating" hidden aria-label="Chats">
+      <ul id="chatList" class="p-list p-list-touch"></ul>
+    </nav>
+    <section id="chat" aria-label="Conversation" hidden>
+      <ul id="messages" class="p-list p-list-touch" aria-live="polite"></ul>
+    </section>
+    <section id="composeView" class="p-container" hidden>
+      <div id="pendingCharts"></div>
+      <div>
+        <h2>Risk management charts</h2>
+        <div class="p-list p-list-touch">
+          <button class="p-list-row p-button p-button-touch p-button-borderless chart-tool" data-chart="avoidance" type="button">Avoidance</button>
+          <button class="p-list-row p-button p-button-touch p-button-borderless chart-tool" data-chart="lossPrevention" type="button">Loss prevention</button>
+          <button class="p-list-row p-button p-button-touch p-button-borderless chart-tool" data-chart="lossReduction" type="button">Loss reduction</button>
+          <button class="p-list-row p-button p-button-touch p-button-borderless chart-tool" data-chart="duplication" type="button">Duplication</button>
+          <button class="p-list-row p-button p-button-touch p-button-borderless chart-tool" data-chart="separation" type="button">Separation</button>
+          <button class="p-list-row p-button p-button-touch p-button-borderless chart-tool" data-chart="diversification" type="button">Diversification</button>
+        </div>
+        <button id="helpButton" class="p-button p-button-touch p-button-secondary" type="button" data-p-open-modal="#helpSheet">Chart help</button>
+      </div>
+    </section>
   </section>
 
-  <nav id="topbar" class="topbar" aria-label="Chat navigation" hidden>
-    <div class="topbar-left">
-      <button id="chatMenuButton" class="p-button p-button-borderless p-button-touch icon-button" type="button" aria-label="Chats" title="Chats"><i class="ph-bold ph-list" aria-hidden="true"></i></button>
-      <button id="newChatTopButton" class="p-button p-button-borderless p-button-touch icon-button" type="button" aria-label="New chat" title="New chat"><i class="ph-bold ph-pencil-simple" aria-hidden="true"></i></button>
-    </div>
-    <button id="openChatButton" class="p-button p-button-borderless p-button-touch icon-button" type="button" aria-label="Open chat" title="Open chat"><i class="ph-bold ph-folder-open" aria-hidden="true"></i></button>
-    <button id="saveChatButton" class="p-button p-button-borderless p-button-touch icon-button" type="button" aria-label="Save chats" title="Save chats"><i class="ph-bold ph-floppy-disk" aria-hidden="true"></i></button>
-  </nav>
-  <aside id="chatMenu" class="chat-menu" hidden aria-label="Chats"><div id="chatList" class="chat-list"></div></aside>
   <input id="loadChatFile" type="file" accept="application/json" hidden>
-  <nav id="toolbar" class="toolbar" aria-label="Chat controls" hidden>
-    <button id="cancelComposeButton" class="p-button p-button-secondary p-button-touch" type="button" hidden>Cancel</button>
-    <div class="toolbar-spacer"></div>
-    <button id="composeButton" class="p-button p-button-primary p-button-touch compose-icon-button" type="button" aria-label="Compose chart message" title="Compose chart message"><i class="ph-bold ph-pencil-simple" aria-hidden="true"></i></button>
-  </nav>
+  <div id="toolbar" class="p-toolbar-touch p-toolbar-touch-fixed" role="toolbar" aria-label="Chat controls" hidden>
+    <button id="cancelComposeButton" class="p-toolbar-touch__item" type="button" hidden>Cancel</button>
+    <button id="composeButton" class="p-toolbar-touch__item p-toolbar-touch-prominent" type="button" aria-label="Compose chart message" title="Compose chart message"><i class="ph-bold ph-pencil-simple" aria-hidden="true"></i></button>
+  </div>
 
-  <section id="helpDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
-    <div class="dialog-card p-window"><header><h2 id="helpTitle">Risk management charts</h2><button class="p-button p-button-secondary dialog-close icon-button" type="button" aria-label="Close" title="Close"><i class="ph-bold ph-x" aria-hidden="true"></i></button></header><div id="chartDescriptions" class="descriptions"></div></div>
-  </section>
-
+  <div class="p-modal-background" id="helpDialog">
+    <section class="p-modal p-bottom-sheet p-bottom-sheet-large" id="helpSheet" data-p-close-on-outside="true" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="helpTitle">
+      <div class="p-bottom-sheet__grabber"></div>
+      <header class="p-bottom-sheet__header">
+        <button class="p-button p-button-touch-small p-button-borderless dialog-close" type="button" data-p-cancel>Close</button>
+        <h2 class="p-bottom-sheet__title" id="helpTitle">Risk management charts</h2>
+      </header>
+      <div class="p-bottom-sheet__body p-container">
+        <div id="chartDescriptions"></div>
+      </div>
+    </section>
+  </div>
 </main>
 <script type="module" src="./main.js"></script>
 </body>
