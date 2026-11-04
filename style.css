@@ -28,3 +28,17 @@
 
 /* Inline chart composer: no horizontal separators */
 .chat-header,.compose-tools,.toolbar,.descriptions article{border-top:0!important;border-bottom:0!important}
+
+/* Compose without headings or helper copy; accessible row-based chart editing */
+.compose-intro,.tool-hint{display:none!important}
+#pendingCharts{flex:1;overflow-y:auto;min-height:0}
+.pending-chart-card{gap:12px;padding:14px 0}
+.pending-chart-card>input,.chart-series>input{font-size:15px;padding:10px;border:1px solid var(--border);border-radius:7px;width:100%;background:#fff;color:var(--text)}
+.chart-data-fields,.chart-series,.chart-data-rows{display:grid;gap:8px;min-width:0}
+.chart-data-row{display:grid;grid-template-columns:minmax(0,1fr) repeat(2,minmax(58px,.7fr)) 30px;gap:6px;align-items:center}
+.chart-data-row input{min-width:0;width:100%;padding:9px 6px;border:1px solid var(--border);border-radius:7px;font-size:13px;background:#fff;color:var(--text)}
+.chart-data-row-head{font-size:11px;color:var(--muted);font-weight:600}
+.chart-data-row button,.chart-data-rows>button{width:32px;height:32px;border:0;border-radius:7px;background:#eef4fc;color:var(--blue);font-size:19px}
+.chart-series>label{font-size:12px;font-weight:650}
+.chart-series .chart-data-row{grid-template-columns:repeat(3,minmax(0,1fr)) 30px}
+.chart-data-row-head span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
