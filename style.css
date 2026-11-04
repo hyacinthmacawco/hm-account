@@ -22,3 +22,6 @@
 .help-chart-wrap{height:190px;margin:10px 0 16px;position:relative}
 .descriptions article{min-width:0}
 .add-chart-button{display:block;width:100%;margin-top:14px;padding:11px 16px;border:0;border-radius:7px}
+
+/* Keep connection setup full-screen; reveal chat toolbar only after a chat starts */
+#toolbar[hidden]{display:none!important}
