@@ -40,18 +40,18 @@
 
   <section id="workspace" class="p-pane-scroll" hidden>
     <nav id="chatMenu" class="p-sidebar p-sidebar-touch p-sidebar-touch-floating" hidden aria-label="Chats">
-      <ul id="chatList" class="p-list p-list-touch"></ul>
+      <div class="p-sidebar-touch__header">
+        <button id="sidebarNewChat" class="p-sidebar-touch__button" type="button">New chat</button>
+        <span class="p-sidebar-touch__spacer"></span>
+        <button id="sidebarCloseButton" class="p-sidebar-touch__button" type="button" aria-label="Close sidebar"><i class="ph-bold ph-x" aria-hidden="true"></i></button>
+      </div>
+      <div id="chatList" aria-label="Saved chats"></div>
     </nav>
     <section id="chat" aria-label="Conversation" hidden>
+      <p id="chatError" class="p-list-touch-footer" role="status" aria-live="polite"></p>
       <ul id="messages" class="p-list p-list-touch" aria-live="polite"></ul>
     </section>
     <section id="composeView" class="p-pane-scroll" hidden>
-      <div class="p-container">
-        <h2 class="p-list-touch-header p-list-touch-header--prominent">New message</h2>
-        <div class="p-field-group-touch">
-          <textarea id="messageDraft" class="p-field p-field-touch" rows="3" placeholder="Write a message…" aria-label="Message"></textarea>
-        </div>
-      </div>
       <div class="p-container">
         <h2 class="p-list-touch-header p-list-touch-header--prominent">Charts</h2>
         <ul id="pendingCharts" class="p-list p-list-touch p-list-inset"></ul>
@@ -72,7 +72,7 @@
   <input id="loadChatFile" type="file" accept="application/json" hidden>
   <div id="toolbar" class="p-toolbar-touch p-toolbar-touch-fixed" role="toolbar" aria-label="Chat controls" hidden>
     <button id="cancelComposeButton" class="p-toolbar-touch__item" type="button" hidden>Cancel</button>
-    <button id="composeButton" class="p-toolbar-touch__item p-toolbar-touch-prominent" type="button" aria-label="Compose message" title="Compose message"><i class="ph-bold ph-pencil-simple" aria-hidden="true"></i></button>
+    <button id="composeButton" class="p-toolbar-touch__item p-toolbar-touch-prominent" type="button" aria-label="Add chart" title="Add chart"><i class="ph-bold ph-pencil-simple" aria-hidden="true"></i></button>
   </div>
 
   <div class="p-modal-background" id="helpDialog">
