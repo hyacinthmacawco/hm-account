@@ -134,3 +134,435 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+
+/* App-wide responsive layout */
+:root {
+  color-scheme: light dark;
+  --app-content-width: 960px;
+  --app-page-gutter: clamp(12px, 3vw, 28px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: clip;
+}
+
+/* Connection/setup screen */
+#setupView {
+  width: min(100% - 2 * var(--app-page-gutter), 560px);
+  margin: auto;
+  padding: clamp(16px, 4vw, 32px);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+#setupView > p:first-child {
+  margin: 0;
+  text-align: center;
+}
+
+#qrCode {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+#qrCode canvas,
+#qrCode img {
+  display: block;
+  width: min(260px, 72vw) !important;
+  height: auto !important;
+  max-width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+}
+
+#copyCode {
+  width: 100%;
+  max-width: 100%;
+}
+
+#setupView .p-field-group-touch {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+#pasteCode {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  resize: vertical;
+  overflow-wrap: anywhere;
+}
+
+/* Navigation and main workspace */
+#topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  width: 100%;
+  min-width: 0;
+}
+
+#topbar .p-nav-bar__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding-inline: var(--app-page-gutter);
+}
+
+#topbar .p-nav-bar__group {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 2px;
+  min-width: 0;
+}
+
+#topbar .p-nav-bar__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-inline: 4px;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#topbar .p-nav-bar__button {
+  flex: 0 0 auto;
+}
+
+#workspace {
+  position: relative;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0 var(--app-page-gutter);
+  overflow-x: clip;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#chat,
+#composeView {
+  width: min(100%, var(--app-content-width));
+  min-width: 0;
+  margin-inline: auto;
+}
+
+#chat {
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
+}
+
+#messages {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+#messages > .p-list-row {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: clamp(12px, 2.5vw, 20px);
+}
+
+#messages .p-container {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0;
+}
+
+#messages canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Sidebar stays inside the workspace region */
+#chatMenu {
+  position: absolute;
+  z-index: 15;
+  top: 0;
+  bottom: 0;
+  left: var(--app-page-gutter);
+  width: min(360px, calc(100vw - 2 * var(--app-page-gutter)));
+  max-width: calc(100% - 8px);
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#chatList,
+#chatList .p-sidebar-row {
+  min-width: 0;
+  max-width: 100%;
+}
+
+#chatList .p-sidebar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#chatList .p-sidebar-row > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#chatList .p-sidebar-touch__button {
+  flex: 0 0 auto;
+}
+
+/* Composer and chart type picker */
+#composeView {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+}
+
+#composeView > .p-container {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 16px 0;
+}
+
+#composeView .p-list,
+#pendingCharts {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin-inline: 0;
+}
+
+#composeView .chart-tool {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+}
+
+#composeView .chart-tool .p-list-label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+#composeView .chart-tool .p-list-trailing-icon {
+  flex: 0 0 auto;
+}
+
+#workspaceError {
+  width: min(100%, var(--app-content-width));
+  margin: 8px auto;
+  overflow-wrap: anywhere;
+}
+
+/* Fixed bottom controls respect device safe areas */
+#toolbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  width: 100%;
+  min-width: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+#toolbar .p-toolbar-touch__item {
+  min-width: 0;
+}
+
+#composeButton {
+  flex: 0 0 auto;
+}
+
+/* Help sheet and its examples */
+#helpDialog {
+  z-index: 50;
+}
+
+#helpSheet {
+  width: min(100%, 760px);
+  max-width: 100%;
+  max-height: min(92dvh, 900px);
+  overflow: hidden;
+}
+
+#helpSheet .p-bottom-sheet__body {
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+#chartDescriptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  min-width: 0;
+}
+
+#chartDescriptions article {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#chartDescriptions .p-container {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  height: clamp(180px, 24vw, 260px);
+  padding: 0;
+}
+
+#chartDescriptions canvas {
+  display: block;
+  max-width: 100%;
+}
+
+/* All form controls remain within their parent column */
+input,
+textarea,
+select,
+button {
+  max-width: 100%;
+}
+
+input.p-field,
+textarea.p-field,
+select.p-field,
+.p-field-group-touch,
+.p-field-group-touch > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+textarea {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 700px) {
+  :root {
+    --app-page-gutter: 12px;
+  }
+
+  #topbar .p-nav-bar__row {
+    gap: 4px;
+    padding-inline: 8px;
+  }
+
+  #topbar .p-nav-bar__group {
+    gap: 0;
+  }
+
+  #topbar .p-nav-bar__title {
+    font-size: clamp(0.95rem, 4vw, 1.15rem);
+  }
+
+  #workspace {
+    padding-inline: 0;
+  }
+
+  #chatMenu {
+    left: 8px;
+    width: min(340px, calc(100vw - 16px));
+  }
+
+  #messages > .p-list-row {
+    padding: 12px 8px;
+  }
+
+  #composeView > .p-container {
+    padding: 12px 8px;
+  }
+
+  #chartDescriptions {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
+  }
+
+  #chartDescriptions .p-container {
+    height: 220px;
+  }
+
+  #toolbar {
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 380px) {
+  #topbar .p-nav-bar__button {
+    padding-inline: 7px;
+  }
+
+  #topbar .p-nav-bar__title {
+    margin-inline: 0;
+    font-size: 0.9rem;
+  }
+
+  #setupView {
+    padding: 14px;
+  }
+}
+
+@media (min-width: 1000px) {
+  #workspace {
+    padding-inline: max(var(--app-page-gutter), calc((100% - var(--app-content-width)) / 2));
+  }
+
+  #chatMenu {
+    left: max(var(--app-page-gutter), calc((100% - var(--app-content-width)) / 2));
+  }
+}
