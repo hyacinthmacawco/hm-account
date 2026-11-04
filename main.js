@@ -1,6 +1,6 @@
 import { createP2P } from "./p2p.js";
 const $=id=>document.getElementById(id);
-const setup=$("setupView"),choice=$("chatChoice"),chat=$("chat"),qr=$("qrCode"),paste=$("pasteCode");
+const setup=$("setupView"),chat=$("chat"),qr=$("qrCode"),paste=$("pasteCode");
 const messagesEl=$("messages"),composeView=$("composeView"),composeButton=$("composeButton"),errorEl=$("error");
 let connected=false,chatStarted=false,localCode="",stage="offer",composerOpen=false,messages=[],pendingCharts=[],peer,chats=[],activeChatId=null;
 const renderedCharts=[];
