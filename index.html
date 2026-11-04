@@ -22,13 +22,14 @@
     <p id="error" class="error" role="status" aria-live="polite"></p>
   </section>
 
+  <section id="chatChoice" class="chat-choice" hidden><h2>Start chatting</h2><p>Choose how you want to begin.</p><div class="choice-actions"><button id="newChatButton" class="choice-button" type="button" aria-label="Start new chat"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>New chat</span></button><button id="loadChatButton" class="choice-button" type="button" aria-label="Load chat"><svg viewBox="0 0 24 24"><path d="M3 7h7l2 2h9v10H3z"/><path d="M12 16V11m-3 3 3-3 3 3"/></svg><span>Load chat</span></button></div><input id="loadChatFile" type="file" accept="application/json" hidden></section>
   <section id="chat" class="chat-view" hidden>
     <header class="chat-header"><strong>HM Account</strong><span id="connectionStatus">Connected</span></header>
     <div id="messages" class="messages" aria-live="polite"></div>
   </section>
 
   <section id="composeView" class="compose-view" hidden>
-    <div class="compose-intro"><strong>Compose a chart message</strong><span>Choose a risk-management chart below. The chart itself is sent to the recipient.</span></div><textarea id="composeText" placeholder="Add an optional explanation to your chart…" aria-label="Optional chart explanation"></textarea>
+    <div class="compose-intro"><strong>Compose a chart message</strong><span>Choose a risk-management chart below. The chart itself is sent to the recipient.</span></div><textarea id="composeText" placeholder="Add an optional explanation to your chart…" aria-label="Optional chart explanation"></textarea><div id="pendingCharts" class="pending-charts" aria-live="polite"></div>
     <div class="compose-tools">
       <div class="chart-tools" aria-label="Risk management charts">
         <button class="chart-tool" data-chart="avoidance" aria-label="Avoidance chart" title="Avoidance"><svg viewBox="0 0 24 24"><path d="M4 19V5m0 14h16M7 15l4-5 3 3 5-7"/></svg></button>
@@ -44,24 +45,20 @@
   </section>
 
   <nav id="toolbar" class="toolbar" aria-label="Chat controls">
-    <button id="versionButton" class="icon-button" type="button" aria-label="Version history" title="Version history"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/></svg></button>
+    <button id="saveChatButton" class="icon-button" type="button" aria-label="Save chat" title="Save chat"><svg viewBox="0 0 24 24"><path d="M5 3h12l4 4v14H3V3z"/><path d="M7 3v6h10V3M7 21v-8h10v8"/></svg></button>
     <div class="toolbar-spacer"></div>
-    <button id="cancelComposeButton" class="icon-button" type="button" aria-label="Cancel composing" title="Cancel" hidden><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
-    <button id="composeButton" class="icon-button" type="button" aria-label="Compose message" title="Compose message"><svg viewBox="0 0 24 24"><path d="m4 20 4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.5 6.5 3 3"/></svg></button>
+    
+    <button id="composeButton" class="icon-button compose-action" type="button" aria-label="Compose chart message" title="Compose chart message"><svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></button>
     
   </nav>
 
   <section id="chartDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="chartTitle" hidden>
-    <div class="dialog-card chart-editor"><header><h2 id="chartTitle">Chart</h2><button class="icon-button dialog-close" type="button" aria-label="Close">×</button></header><label class="field-label" for="chartName">Chart title</label><input id="chartName" maxlength="100" placeholder="Give your chart a title"><label class="field-label" for="chartContext">What does this chart represent?</label><textarea id="chartContext" rows="2" placeholder="Describe the risk, measure, or scenario…"></textarea><label class="field-label" for="chartLabels">Category labels <span>comma-separated</span></label><input id="chartLabels" placeholder="Category A, Category B, Category C"><label class="field-label" for="chartValues">Values <span>one number per category, in the same order</span></label><input id="chartValues" inputmode="decimal" placeholder="60, 30, 10"><p id="chartError" class="error" role="status" aria-live="polite"></p><div class="preview-heading">Chart preview</div><div class="chart-wrap"><canvas id="chartCanvas"></canvas></div><button id="sendChartButton" class="primary-button send-chart" type="button">Send chart message</button></div>
+    <div class="dialog-card chart-editor"><header><button class="icon-button dialog-close" type="button" aria-label="Save chart and close">×</button><h2 id="chartTitle">Chart</h2></header><label class="field-label" for="chartName">Chart title</label><input id="chartName" maxlength="100" placeholder="Give your chart a title"><label class="field-label" for="chartContext">What does this chart represent?</label><textarea id="chartContext" rows="2" placeholder="Describe the risk, measure, or scenario…"></textarea><label class="field-label" for="chartLabels">Category labels <span>comma-separated</span></label><input id="chartLabels" placeholder="Category A, Category B, Category C"><label class="field-label" for="chartValues">Values <span>one number per category, in the same order</span></label><input id="chartValues" inputmode="decimal" placeholder="60, 30, 10"><p id="chartError" class="error" role="status" aria-live="polite"></p><div class="preview-heading">Chart preview</div><div class="chart-wrap"><canvas id="chartCanvas"></canvas></div></div>
   </section>
   <section id="helpDialog" class="dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle" hidden>
     <div class="dialog-card"><header><h2 id="helpTitle">Risk management charts</h2><button class="icon-button dialog-close" type="button" aria-label="Close">×</button></header><div id="chartDescriptions" class="descriptions"></div></div>
   </section>
-  <section id="versionPanel" class="version-panel" hidden>
-    <header><strong>Version history</strong><button id="closeVersionPanel" class="icon-button" type="button" aria-label="Close">×</button></header>
-    <div id="versionsList"></div>
-    <div class="version-actions"><button id="saveVersionButton" type="button">Save version</button><button id="exportChatsButton" type="button">Export chats</button><button id="importChatsButton" type="button">Import chats</button><input id="chatFile" type="file" accept="application/json" hidden></div>
-  </section>
+
 </main>
 <script type="module" src="./main.js"></script>
 </body>
