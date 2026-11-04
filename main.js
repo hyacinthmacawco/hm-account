@@ -54,9 +54,9 @@ function renderChatList(){
   if(c.id===activeChatId){row.classList.add("p-selected");row.setAttribute("aria-current","page");}
   const icon=document.createElement("i");icon.className="p-sidebar-icon ph-bold ph-chat-circle";icon.setAttribute("aria-hidden","true");
   const title=document.createElement("span");title.textContent=c.title||"New chat";
-  const edit=document.createElement("button");edit.type="button";edit.className="p-sidebar-touch__button";edit.title="Rename chat";edit.setAttribute("aria-label","Rename chat");edit.innerHTML='<i class="ph-bold ph-pencil-simple" aria-hidden="true"></i>';
+  const edit=document.createElement("button");edit.type="button";edit.className="p-button p-button-touch p-button-borderless p-button-icon-only chat-row-action";edit.title="Rename chat";edit.setAttribute("aria-label","Rename chat");edit.innerHTML='<i class="ph-bold ph-pencil-simple" aria-hidden="true"></i>';
   edit.addEventListener("click",event=>{event.stopPropagation();const next=prompt("Chat name",c.title||"New chat");if(next!==null&&next.trim()){c.title=next.trim();renderChatList();}});
-  const remove=document.createElement("button");remove.type="button";remove.className="p-sidebar-touch__button";remove.title="Remove chat";remove.setAttribute("aria-label","Remove chat");remove.innerHTML='<i class="ph-bold ph-trash" aria-hidden="true"></i>';
+  const remove=document.createElement("button");remove.type="button";remove.className="p-button p-button-touch p-button-borderless p-button-icon-only chat-row-action";remove.title="Remove chat";remove.setAttribute("aria-label","Remove chat");remove.innerHTML='<i class="ph-bold ph-trash" aria-hidden="true"></i>';
   remove.addEventListener("click",event=>{event.stopPropagation();if(!confirm("Remove this chat?"))return;const index=chats.findIndex(x=>x.id===c.id);chats.splice(index,1);if(activeChatId===c.id){const next=chats[0];activeChatId=next?.id||null;messages=next?.messages||[];if(!next)startNewChat();}render();});
   const open=()=>{syncActiveChat();activeChatId=c.id;messages=c.messages||[];chatStarted=true;composerOpen=false;pendingCharts=[];setVisible($("chatMenu"),false);setError("");render();};
   row.addEventListener("click",open);
@@ -75,9 +75,9 @@ function render(){
  setVisible($("cancelComposeButton"),composerOpen&&connected&&chatStarted);
  setVisible(composeButton,connected&&chatStarted);
  setVisible($("chatMenu"),!$("chatMenu").hidden&&connected&&chatStarted);
- composeButton.innerHTML=composerOpen?'<i class="ph-bold ph-paper-plane-tilt" aria-hidden="true"></i>':'<i class="ph-bold ph-plus" aria-hidden="true"></i>';
- composeButton.setAttribute("aria-label",composerOpen?"Send charts":"Add chart");
- composeButton.title=composerOpen?"Send charts":"Add chart";
+ composeButton.innerHTML=composerOpen?'<i class="ph-bold ph-paper-plane-tilt" aria-hidden="true"></i>':'<i class="ph-bold ph-pencil-simple" aria-hidden="true"></i>';
+ composeButton.setAttribute("aria-label",composerOpen?"Send charts":"Compose");
+ composeButton.title=composerOpen?"Send charts":"Compose";
  renderChatList();renderPendingCharts();renderMessages();
 }
 function chartValidationError(chart){
@@ -197,7 +197,6 @@ paste.addEventListener("input",()=>{if(paste.value.trim().endsWith("}"))processP
 
 $("openChatButton").addEventListener("click",()=>$("loadChatFile").click());
 $("chatMenuButton").addEventListener("click",()=>{setVisible($("chatMenu"),$("chatMenu").style.display==="none");});
-$("sidebarCloseButton").addEventListener("click",()=>setVisible($("chatMenu"),false));
 $("sidebarNewChat").addEventListener("click",()=>{setVisible($("chatMenu"),false);startNewChat();});
 document.addEventListener("click",e=>{if(!$("chatMenu").contains(e.target)&&!$("chatMenuButton").contains(e.target))setVisible($("chatMenu"),false);});
 $("cancelComposeButton").addEventListener("click",()=>{composerOpen=false;setError("");render();});
