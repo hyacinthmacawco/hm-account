@@ -1,6 +1,6 @@
 import { createP2P } from "./p2p.js";
 const $=id=>document.getElementById(id);
-const setup=$("setupView"),chat=$("chat"),qr=$("qrCode"),paste=$("pasteCode");
+const setup=$("setupView"),chat=$("chat"),qr=$("qrCode"),paste=$("pasteCode"),messageDraft=$("messageDraft");
 const messagesEl=$("messages"),composeView=$("composeView"),composeButton=$("composeButton"),errorEl=$("error");
 let connected=false,chatStarted=false,localCode="",stage="offer",composerOpen=false,messages=[],pendingCharts=[],peer,chats=[],activeChatId=null;
 const renderedCharts=[];
@@ -34,7 +34,7 @@ function renderChatList(){
  chats.forEach(c=>{
   const row=document.createElement("li");row.className="p-list-row";
   const label=document.createElement("button");label.type="button";label.className="p-button p-button-touch p-button-borderless";
-  const first=c.messages?.find(m=>m.kind==="text"&&m.text)||c.messages?.find(m=>m.kind==="risk-chart");
+  const first=c.messages?.find(m=>(m.kind==="text"||m.kind==="chat-message")&&m.text)||c.messages?.find(m=>m.kind==="risk-chart");
   label.textContent=c.title||(first?.kind==="text"?first.text.slice(0,34):(first?.charts?.[0]?.title||first?.chart?.title||"New chat"));label.title=label.textContent;
   label.addEventListener("click",()=>{syncActiveChat();activeChatId=c.id;messages=c.messages||[];chatStarted=true;composerOpen=false;pendingCharts=[];$("chatMenu").hidden=true;render();});
   const edit=document.createElement("button");edit.type="button";edit.className="p-button p-button-touch-small p-button-borderless p-button-icon-only";edit.title="Rename chat";edit.setAttribute("aria-label","Rename chat");edit.innerHTML='<i class="ph-bold ph-pencil-simple" aria-hidden="true"></i>';
@@ -45,16 +45,27 @@ function renderChatList(){
  });
 }
 function render(){setup.hidden=connected;$("topbar").hidden=!connected||!chatStarted;$("workspace").hidden=!connected||!chatStarted;$("toolbar").hidden=!connected||!chatStarted;chat.hidden=!connected||!chatStarted||composerOpen;composeView.hidden=!composerOpen;$("cancelComposeButton").hidden=!composerOpen;composeButton.hidden=!connected||!chatStarted;composeButton.innerHTML=composerOpen?'<i class="ph-bold ph-paper-plane-tilt" aria-hidden="true"></i>':'<i class="ph-bold ph-pencil-simple" aria-hidden="true"></i>';composeButton.setAttribute("aria-label",composerOpen?"Send chart message":"Compose chart message");composeButton.title=composerOpen?"Send chart message":"Compose chart message";renderChatList();renderPendingCharts();renderMessages();}
+function chartValidationError(chart){
+ const data=chart?.config?.data;const datasets=data?.datasets||[];
+ if(!datasets.length)return "Add at least one data series.";
+ if(chart.type==="duplication"||chart.type==="diversification"){
+  for(const ds of datasets){if(!Array.isArray(ds.data)||!ds.data.length)return "Each series needs at least one data point.";for(const point of ds.data){if(point.x===null||point.x===""||!Number.isFinite(Number(point.x)))return "Enter a numeric X value for every point.";if(point.y===null||point.y===""||!Number.isFinite(Number(point.y)))return "Enter a numeric Y value for every point.";if(chart.type==="diversification"&&(point.r===null||point.r===""||!Number.isFinite(Number(point.r))||Number(point.r)<=0))return "Enter a positive bubble size for every point.";}}
+  return "";
+ }
+ const labels=data?.labels||[];if(!labels.length||labels.some(label=>!String(label).trim()))return "Enter a category for every row.";
+ for(const ds of datasets){if(!Array.isArray(ds.data)||ds.data.length!==labels.length)return "Each series must have a value for every category.";if(ds.data.some(value=>value===null||value===""||!Number.isFinite(Number(value))))return "Enter a numeric value for every category.";}
+ return "";
+}
 function renderPendingCharts(){
  while(pendingChartInstances.length)pendingChartInstances.pop().destroy();const holder=$("pendingCharts");holder.replaceChildren();
  pendingCharts.forEach((c,i)=>{
-  const card=document.createElement("article");card.className="pending-chart-card";const top=document.createElement("div");top.className="pending-chart-heading";const name=document.createElement("strong");name.textContent=chartInfo[c.type].title+(c.title?" — "+c.title:"");const actions=document.createElement("div");actions.className="pending-chart-actions";
-  const action=(symbol,label,disabled,fn)=>{const icons={"Move up":"ph-arrow-up","Move down":"ph-arrow-down","Remove chart":"ph-trash","Remove row":"ph-trash","Remove point":"ph-trash","Add row":"ph-plus","Add duplicate":"ph-plus","Remove series":"ph-trash","Add series":"ph-plus"};const b=document.createElement("button");b.type="button";b.className="p-button p-button-touch-small p-button-secondary p-button-icon-only";b.innerHTML=`<i class="ph-bold ${icons[label]||"ph-dots-three"}" aria-hidden="true"></i>`;b.title=label;b.setAttribute("aria-label",label);b.disabled=disabled;b.addEventListener("click",fn);return b;};
+  const card=document.createElement("li");card.className="p-list-row";const top=document.createElement("div");top.className="pending-chart-heading";const name=document.createElement("strong");name.textContent=chartInfo[c.type].title+(c.title?" — "+c.title:"");const actions=document.createElement("div");actions.className="pending-chart-actions";
+  const action=(symbol,label,disabled,fn)=>{const icons={"Move up":"ph-arrow-up","Move down":"ph-arrow-down","Remove chart":"ph-trash","Remove row":"ph-trash","Remove point":"ph-trash","Add row":"ph-plus","Add duplicate":"ph-plus","Remove series":"ph-trash","Add series":"ph-plus"};const b=document.createElement("button");b.type="button";b.className="p-button p-button-touch p-button-secondary p-button-icon-only";b.innerHTML=`<i class="ph-bold ${icons[label]||"ph-dots-three"}" aria-hidden="true"></i>`;b.title=label;b.setAttribute("aria-label",label);b.disabled=disabled;b.addEventListener("click",fn);return b;};
   actions.append(action("","Move up",i===0,()=>{[pendingCharts[i-1],pendingCharts[i]]=[pendingCharts[i],pendingCharts[i-1]];renderPendingCharts();}),action("","Move down",i===pendingCharts.length-1,()=>{[pendingCharts[i+1],pendingCharts[i]]=[pendingCharts[i],pendingCharts[i+1]];renderPendingCharts();}),action("","Remove chart",false,()=>{pendingCharts.splice(i,1);renderPendingCharts();}));top.append(name,actions);
   const title=document.createElement("input");title.type="text";title.className="p-field p-field-touch p-field-touch-filled";title.maxLength=100;title.placeholder="Chart title";title.value=c.title||"";title.setAttribute("aria-label","Chart title");
   const editor=document.createElement("div");editor.className="p-container";const status=document.createElement("p");status.className="chart-edit-error";status.setAttribute("role","status");const preview=document.createElement("div");preview.className="inline-chart-preview";const canvas=document.createElement("canvas");canvas.setAttribute("role","img");canvas.setAttribute("aria-label",chartInfo[c.type].title+" preview");preview.append(canvas);const datasets=c.config.data.datasets;
   const field=(value,placeholder,change,type="text")=>{const input=document.createElement("input");input.className="p-field p-field-touch p-field-touch-filled";input.type=type;input.value=value??"";input.placeholder=placeholder;input.addEventListener("input",()=>change(type==="number"?(input.value===""?null:Number(input.value)):input.value));return input;};
-  const update=()=>{try{if(!datasets.length||datasets.some(ds=>!ds.data?.length))throw Error("Each series must contain at least one data point.");const old=pendingChartInstances.find(x=>x.canvas===canvas);if(old){old.destroy();pendingChartInstances.splice(pendingChartInstances.indexOf(old),1);}pendingChartInstances.push(new Chart(canvas,chartConfig(c)));c.dataError=false;status.textContent="";}catch(err){c.dataError=true;status.textContent=err.message;}};
+  const update=()=>{const validation=chartValidationError(c);c.dataError=!!validation;status.textContent=validation;const old=pendingChartInstances.find(x=>x.canvas===canvas);if(old){old.destroy();pendingChartInstances.splice(pendingChartInstances.indexOf(old),1);}if(typeof Chart==="undefined"){if(!validation)status.textContent="Chart preview is unavailable, but the chart can still be sent.";return;}try{pendingChartInstances.push(new Chart(canvas,chartConfig(c)));}catch(err){if(!validation)status.textContent="Preview unavailable: "+err.message;}};
   title.addEventListener("input",()=>{c.title=title.value;if(c.type==="duplication")datasets[0].label=title.value;name.textContent=chartInfo[c.type].title+(c.title?" — "+c.title:"");update();});
   if(["avoidance","lossPrevention","lossReduction","separation"].includes(c.type)){
    const labels=c.config.data.labels||[],rows=document.createElement("div");rows.className="p-container";const head=document.createElement("div");["Category",...datasets.map(ds=>ds.label||"Value")," "].forEach(t=>{const span=document.createElement("span");span.textContent=t;head.append(span);});rows.append(head);
@@ -65,7 +76,7 @@ function renderPendingCharts(){
    ds.data.forEach((point,pi)=>{const row=document.createElement("div");row.className="p-field-group-touch";row.append(field(point.category,"Duplicate "+(pi+1),v=>{point.category=v;update();}),field(point.x,"X value",v=>{point.x=v;update();},"number"),field(point.y,"Y value",v=>{point.y=v;update();},"number"),action("","Remove row",ds.data.length<=1,()=>{ds.data.splice(pi,1);renderPendingCharts();}));rows.append(row);});
    rows.append(action("","Add duplicate",false,()=>{ds.data.push({x:null,y:null,category:""});renderPendingCharts();}));editor.append(rows);
   }else if(c.type==="diversification"){
-   datasets.forEach((ds,di)=>{const section=document.createElement("section");section.className="p-container";section.append(field(ds.label,"Series "+(di+1),v=>{ds.label=v;update();}));const removeSeries=action("","Remove series",datasets.length<=1,()=>{datasets.splice(di,1);renderPendingCharts();});removeSeries.className="p-button p-button-touch-small p-button-secondary p-button-icon-only";section.append(removeSeries);const rows=document.createElement("div");rows.className="p-field-group-touch";const head=document.createElement("div");head.className="chart-data-row chart-data-row-head";["X value","Y value","Size"," "].forEach(t=>{const span=document.createElement("span");span.textContent=t;head.append(span);});rows.append(head);ds.data.forEach((point,pi)=>{const row=document.createElement("div");row.className="p-field-group-touch";["x","y","r"].forEach(k=>row.append(field(point[k],k==="r"?"Size":k.toUpperCase(),v=>{point[k]=v;update();},"number")));row.append(action("","Remove point",ds.data.length<=1,()=>{ds.data.splice(pi,1);renderPendingCharts();}));rows.append(row);});section.append(rows);editor.append(section);});
+   datasets.forEach((ds,di)=>{const section=document.createElement("section");section.className="p-container";section.append(field(ds.label,"Series "+(di+1),v=>{ds.label=v;update();}));const removeSeries=action("","Remove series",datasets.length<=1,()=>{datasets.splice(di,1);renderPendingCharts();});removeSeries.className="p-button p-button-touch p-button-secondary p-button-icon-only";section.append(removeSeries);const rows=document.createElement("div");rows.className="p-field-group-touch";const head=document.createElement("div");head.className="chart-data-row chart-data-row-head";["X value","Y value","Size"," "].forEach(t=>{const span=document.createElement("span");span.textContent=t;head.append(span);});rows.append(head);ds.data.forEach((point,pi)=>{const row=document.createElement("div");row.className="p-field-group-touch";["x","y","r"].forEach(k=>row.append(field(point[k],k==="r"?"Size":k.toUpperCase(),v=>{point[k]=v;update();},"number")));row.append(action("","Remove point",ds.data.length<=1,()=>{ds.data.splice(pi,1);renderPendingCharts();}));rows.append(row);});section.append(rows);editor.append(section);});
    const addSeries=action("","Add series",false,()=>{datasets.push({label:"",data:[{x:null,y:null,r:null}],backgroundColor:["#1769e0","#69a98b","#e8b65b","#a58bd4"][datasets.length%4]});renderPendingCharts();});addSeries.className="p-button p-button-touch p-button-secondary";editor.append(addSeries);
   }
   card.append(top,title,editor,status,preview);holder.append(card);update();
@@ -82,7 +93,8 @@ function renderMessages(){
  for(const m of messages){
   const item=document.createElement("li");item.className="p-list-row";
   const meta=document.createElement("div");meta.className="message-meta";meta.textContent=new Date(m.timestamp).toLocaleString();item.append(meta);
-  const charts=m.kind==="risk-chart"?(m.charts?.length?m.charts:(m.chart?[m.chart]:[])):[];
+  const charts=m.kind==="risk-chart"?(m.charts?.length?m.charts:(m.chart?[m.chart]:[])):(m.kind==="chat-message"&&Array.isArray(m.charts)?m.charts:[]);
+  if(m.kind==="chat-message"&&m.text){const body=document.createElement("p");body.textContent=m.text;item.append(body);}
   if(charts.length){
    for(const c of charts){
     const card=document.createElement("section");card.className="p-container";
@@ -92,7 +104,7 @@ function renderMessages(){
     try{renderedCharts.push(new Chart(canvas,c.config?chartConfig(c):legacyChartConfig(c)));}catch(e){const p=document.createElement("p");p.textContent="Chart display error: "+e.message;card.append(p);}
    }
    
-  }else{const body=document.createElement("div");body.textContent=m.text||"";item.append(body);}
+  }else if(m.kind!=="chat-message"){const body=document.createElement("div");body.textContent=m.text||"";item.append(body);}
   messagesEl.append(item);
  }
  messagesEl.scrollTop=messagesEl.scrollHeight;
@@ -103,7 +115,7 @@ function receive(raw){
   const d=JSON.parse(raw);
   const incoming=d?.charts?.length?d.charts:(d?.chart?[d.chart]:[]);
   if(d?.kind==="risk-chart"&&incoming.length&&incoming.every(c=>c&&(c.config?.type||Array.isArray(c.labels))))m={kind:"risk-chart",charts:incoming,caption:typeof d.caption==="string"?d.caption:"",timestamp:Number(d.timestamp)||Date.now(),mine:false};
-  else if(d?.kind==="chat-message"&&typeof d.text==="string")m={kind:"text",text:d.text,timestamp:Number(d.timestamp)||Date.now(),mine:false};
+  else if(d?.kind==="chat-message"&&typeof d.text==="string")m={kind:"chat-message",text:d.text,charts:Array.isArray(d.charts)?d.charts.filter(c=>c&&c.config?.type):[],timestamp:Number(d.timestamp)||Date.now(),mine:false};
   else m={kind:"text",text:String(raw),timestamp:Date.now(),mine:false};
  }catch{m={kind:"text",text:String(raw),timestamp:Date.now(),mine:false};}
  messages.push(m);renderMessages();renderChatList();
@@ -159,7 +171,7 @@ $("loadChatFile").addEventListener("change",async e=>{
  const file=e.target.files?.[0];if(!file)return;
  try{
   const data=JSON.parse(await file.text());
-  const validMessages=items=>items.filter(m=>m&&((m.kind==="risk-chart"&&(Array.isArray(m.charts)||m.chart))||typeof m.text==="string")).map(m=>({...m,mine:!!m.mine,timestamp:Number(m.timestamp)||Date.now()}));
+  const validMessages=items=>items.filter(m=>m&&((m.kind==="risk-chart"&&(Array.isArray(m.charts)||m.chart))||(m.kind==="chat-message"&&typeof m.text==="string")||typeof m.text==="string")).map(m=>({...m,mine:!!m.mine,timestamp:Number(m.timestamp)||Date.now()}));
   if(Array.isArray(data.chats)){chats=data.chats.filter(c=>c&&Array.isArray(c.messages)).map((c,i)=>({...c,id:c.id||chatId(),title:c.title||"Chat "+(i+1),messages:validMessages(c.messages)}));if(!chats.length)throw Error("No chats found in this file.");activeChatId=chats.some(c=>c.id===data.activeChatId)?data.activeChatId:chats[0].id;messages=activeChat().messages;}
   else if(Array.isArray(data.messages)){messages=validMessages(data.messages);chats=[{id:chatId(),title:"Imported chat",createdAt:Date.now(),messages}];activeChatId=chats[0].id;}
   else throw Error("Invalid chat file.");
@@ -171,16 +183,24 @@ $("saveChatButton").addEventListener("click",()=>{syncActiveChat();const data={f
 
 composeButton.addEventListener("click",()=>{
  if(!composerOpen){composerOpen=true;setError("");render();return;}
- if(!pendingCharts.length){setError("Add at least one chart before sending.");return;}
- if(pendingCharts.some(c=>c.dataError)){setError("Fix the invalid chart data before sending.");return;}
- if(!peer.isConnected()){setError("Connection is not open.");return;}
- const message={kind:"risk-chart",charts:pendingCharts.map(c=>({...c,config:JSON.parse(JSON.stringify(c.config))})),timestamp:Date.now()};
+ const textValue=messageDraft.value.trim();
+ if(!textValue&&!pendingCharts.length){setError("Write a message or add a chart before sending.");return;}
+ if(!peer.isConnected()){setError("The peer connection is not open yet. Wait for it to connect and try again.");return;}
+ const invalid=pendingCharts.find(c=>chartValidationError(c));
+ if(invalid){setError(chartValidationError(invalid));return;}
+ const timestamp=Date.now();
+ const charts=pendingCharts.map(c=>({...c,config:JSON.parse(JSON.stringify(c.config))}));
+ const message=charts.length&&textValue?{kind:"chat-message",text:textValue,charts,timestamp}:charts.length?{kind:"risk-chart",charts,timestamp}:{kind:"chat-message",text:textValue,timestamp};
  try{
-  peer.sendMessage(JSON.stringify(message));messages.push({...message,mine:true});
-  pendingCharts=[];composerOpen=false;setError("");render();
+  peer.sendMessage(JSON.stringify(message));
+  messages.push({...message,mine:true});
+  messageDraft.value="";pendingCharts=[];composerOpen=false;setError("");render();
  }catch(e){setError(e.message||"Message could not be sent.");}
 });
-document.querySelectorAll(".chart-tool").forEach(b=>b.addEventListener("click",()=>addChartToCompose(b.dataset.chart)));
+$("composeView").addEventListener("click",event=>{
+ const button=event.target.closest("[data-chart]");
+ if(button&&$("composeView").contains(button))addChartToCompose(button.dataset.chart);
+});
 function closeDialog(d){if(d===$("helpDialog")||d===$("helpSheet"))while(helpCharts.length)helpCharts.pop().destroy();}
 document.querySelectorAll(".dialog-close").forEach(b=>b.addEventListener("click",()=>closeDialog($("helpSheet"))));
 function composerChartConfig(key){
