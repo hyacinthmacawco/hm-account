@@ -420,7 +420,7 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-#actionBar .p-toolbar-touch__item {
+#actionBar > button {
   min-width: 0;
 }
 
@@ -587,7 +587,7 @@ textarea {
 #actionBar #composeButton{position:relative;isolation:isolate;overflow:hidden;color:var(--p-text-primary,currentColor)!important;background:linear-gradient(145deg,rgba(255,255,255,.52),rgba(255,255,255,.12) 48%,rgba(255,255,255,.24))!important;border:1px solid rgba(255,255,255,.62)!important;box-shadow:0 8px 28px rgba(0,0,0,.16),inset 0 1px 1px rgba(255,255,255,.72),inset 0 -1px 1px rgba(255,255,255,.16)!important;-webkit-backdrop-filter:blur(24px) saturate(180%)!important;backdrop-filter:blur(24px) saturate(180%)!important;-webkit-tap-highlight-color:transparent;touch-action:manipulation;pointer-events:auto!important;cursor:pointer}#actionBar #composeButton:active{transform:scale(.96)}#actionBar #composeButton>i{pointer-events:none}@media(prefers-color-scheme:dark){#actionBar #composeButton{color:#fff!important;background:linear-gradient(145deg,rgba(255,255,255,.28),rgba(255,255,255,.07) 48%,rgba(255,255,255,.14))!important;border-color:rgba(255,255,255,.3)!important;box-shadow:0 8px 28px rgba(0,0,0,.32),inset 0 1px 1px rgba(255,255,255,.34),inset 0 -1px 1px rgba(255,255,255,.08)!important}}#actionBar{z-index:60!important;pointer-events:none}#actionBar #composeButton,#actionBar #cancelComposeButton{pointer-events:auto!important}
 
 
-/* Explicit bottom-toolbar layout: do not inherit Puppertino's stretched item layout. */
+/* Dedicated bottom action bar, independent of Puppertino toolbar layout. */
 #actionBar.app-action-bar {
   position: fixed !important;
   inset: auto 0 0 0 !important;
@@ -681,12 +681,12 @@ textarea {
 }
 
 
-/* Keep the toolbar hidden during connection/setup, despite its fixed flex layout. */
+/* Keep the action bar hidden during connection/setup. */
 #actionBar.app-action-bar[hidden] {
   display: none !important;
 }
 
-/* Keep Cancel at the left edge and Compose/Send at the right edge. */
+/* Keep Cancel left and Compose/Send right. */
 #actionBar.app-action-bar {
   justify-content: space-between !important;
   padding-left: max(20px, env(safe-area-inset-left)) !important;
