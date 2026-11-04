@@ -92,7 +92,7 @@ function receive(raw){
   else if(d?.kind==="chat-message"&&typeof d.text==="string")m={kind:"text",text:d.text,timestamp:Number(d.timestamp)||Date.now(),mine:false};
   else m={kind:"text",text:String(raw),timestamp:Date.now(),mine:false};
  }catch{m={kind:"text",text:String(raw),timestamp:Date.now(),mine:false};}
- messages.push(m);renderMessages();
+ messages.push(m);renderMessages();renderChatList();
 }
 peer=createP2P({
  onMessage:receive,
