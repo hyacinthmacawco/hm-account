@@ -136,9 +136,11 @@ async function processPaste(){
 paste.addEventListener("paste",()=>setTimeout(processPaste,100));
 paste.addEventListener("input",()=>{if(paste.value.trim().endsWith("}"))processPaste();});
 
-$("newChatButton").addEventListener("click",()=>{
- messages=[];pendingCharts=[];chatStarted=true;setError("");render();
-});
+$("newChatButton").addEventListener("click",startNewChat);
+$("newChatTopButton").addEventListener("click",startNewChat);
+$("chatMenuButton").addEventListener("click",()=>{$("chatMenu").hidden=!$("chatMenu").hidden;});
+document.addEventListener("click",e=>{if(!$("chatMenu").contains(e.target)&&!$("chatMenuButton").contains(e.target))$("chatMenu").hidden=true;});
+$("cancelComposeButton").addEventListener("click",()=>{composerOpen=false;pendingCharts=[];setError("");render();});
 $("loadChatButton").addEventListener("click",()=>$("loadChatFile").click());
 $("loadChatFile").addEventListener("change",async e=>{
  const file=e.target.files?.[0];if(!file)return;
