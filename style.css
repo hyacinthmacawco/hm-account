@@ -6,3 +6,14 @@
 .field-label{display:block;font-size:12px;font-weight:650;margin-top:9px}.field-label span{font-weight:400;color:var(--muted)}.preview-heading{font-size:12px;font-weight:650;margin-top:10px}
 .chart-wrap{height:min(35vh,300px);margin-top:12px}.send-chart{width:100%;margin-top:12px}
 .chart-message{width:min(100%,560px);padding:12px;background:#fff;border:1px solid var(--border);border-radius:9px}.chart-message h3{font-size:15px;margin:0 0 6px}.chart-message .chart-context,.message-caption{font-size:13px;line-height:1.45;color:#465365;margin:4px 0 10px}.chart-message canvas{width:100%;max-height:260px}
+
+/* Chat start choices, save action, and multi-chart composing */
+.chat-choice{position:absolute;inset:0 0 var(--toolbar-height);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;padding:24px;background:#fff}
+.chat-choice h2{font-size:20px;margin:0}.chat-choice p{font-size:13px;color:var(--muted);margin:0 0 14px}
+.choice-actions{display:flex;gap:18px}.choice-button{width:112px;height:108px;border:1px solid var(--border);border-radius:12px;background:#fff;color:var(--blue);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.choice-button svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.choice-button span{font-size:13px;color:var(--text)}
+.compose-action{background:var(--blue);color:#fff;border-radius:9px}.compose-action:hover{background:#0f56c5}.compose-action:active{background:#0b48a8}.compose-action svg{stroke:#fff}
+.chart-editor header{justify-content:flex-start}.chart-editor header h2{margin-left:6px}.chart-editor .dialog-close{order:-1;font-size:23px}
+.pending-charts{display:flex;flex-wrap:wrap;gap:7px;padding:0 12px 8px}
+.pending-chart{display:flex;align-items:center;gap:8px;padding:5px 8px 5px 10px;border:1px solid var(--border);border-radius:18px;background:#f5f8fc;font-size:12px}
+.pending-chart button{border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1;padding:0 2px}
