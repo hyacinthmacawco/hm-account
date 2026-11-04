@@ -1,6 +1,6 @@
 import { createP2P } from "./p2p.js";
 const $=id=>document.getElementById(id);
-const setup=$("setupView"),chat=$("chat"),qr=$("qrCode"),paste=$("pasteCode"),messageDraft=$("messageDraft");
+const setup=$("setupView"),chat=$("chat"),qr=$("qrCode"),paste=$("pasteCode");
 const messagesEl=$("messages"),composeView=$("composeView"),composeButton=$("composeButton"),errorEl=$("error");
 let connected=false,chatStarted=false,localCode="",stage="offer",composerOpen=false,messages=[],pendingCharts=[],peer,chats=[],activeChatId=null;
 const renderedCharts=[];
@@ -14,7 +14,15 @@ const chartInfo={
  separation:{title:"Separation",description:"Separation divides assets exposed to loss so one event cannot damage everything at once. For example, fire-resistant factory sections can prevent a fire spreading throughout a facility.",style:"polarArea"},
  diversification:{title:"Diversification",description:"Diversification spreads exposure across different parties, securities, suppliers, or transactions. Using several suppliers reduces dependence on one supplier.",style:"pie"}
 };
-function setError(v=""){errorEl.textContent=v;}
+function setVisible(element,visible){
+ element.hidden=!visible;
+ element.style.display=visible?"":"none";
+}
+function setError(v=""){
+ errorEl.textContent=v;
+ const workspaceError=$("workspaceError");
+ if(workspaceError){workspaceError.textContent=v;setVisible(workspaceError,!!v&&connected);}
+}
 function syncChartTheme(){
  if(typeof Chart==="undefined")return;
  const styles=getComputedStyle(document.body);
@@ -42,19 +50,36 @@ function startNewChat(){syncActiveChat();const c={id:chatId(),title:"New chat",c
 function renderChatList(){
  const list=$("chatList");list.replaceChildren();
  chats.forEach(c=>{
-  const row=document.createElement("li");row.className="p-list-row";
-  const label=document.createElement("button");label.type="button";label.className="p-list-title";
-  const first=c.messages?.find(m=>(m.kind==="text"||m.kind==="chat-message")&&m.text)||c.messages?.find(m=>m.kind==="risk-chart");
-  label.textContent=c.title||(first?.text?.slice(0,34)||first?.charts?.[0]?.title||first?.chart?.title||"New chat");label.title=label.textContent;
-  label.addEventListener("click",()=>{syncActiveChat();activeChatId=c.id;messages=c.messages||[];chatStarted=true;composerOpen=false;pendingCharts=[];$("chatMenu").hidden=true;render();});
-  const edit=document.createElement("button");edit.type="button";edit.className="p-button p-button-touch-small p-button-borderless p-button-icon-only";edit.title="Rename chat";edit.setAttribute("aria-label","Rename chat");edit.innerHTML='<i class="ph-bold ph-pencil-simple" aria-hidden="true"></i>';
-  edit.addEventListener("click",()=>{const next=prompt("Chat name",c.title||label.textContent);if(next!==null&&next.trim()){c.title=next.trim();renderChatList();}});
-  const remove=document.createElement("button");remove.type="button";remove.className="p-button p-button-touch-small p-button-borderless p-button-icon-only";remove.title="Remove chat";remove.setAttribute("aria-label","Remove chat");remove.innerHTML='<i class="ph-bold ph-trash" aria-hidden="true"></i>';
-  remove.addEventListener("click",()=>{if(!confirm("Remove this chat?"))return;const index=chats.findIndex(x=>x.id===c.id);chats.splice(index,1);if(activeChatId===c.id){const next=chats[0];activeChatId=next?.id||null;messages=next?.messages||[];if(!next)startNewChat();}render();});
-  row.append(label,edit,remove);list.append(row);
+  const row=document.createElement("div");row.className="p-sidebar-row";row.tabIndex=0;row.setAttribute("role","button");
+  if(c.id===activeChatId){row.classList.add("p-selected");row.setAttribute("aria-current","page");}
+  const icon=document.createElement("i");icon.className="p-sidebar-icon ph-bold ph-chat-circle";icon.setAttribute("aria-hidden","true");
+  const title=document.createElement("span");title.textContent=c.title||"New chat";title.className="p-sidebar-row-title";
+  const edit=document.createElement("button");edit.type="button";edit.className="p-sidebar-touch__button";edit.title="Rename chat";edit.setAttribute("aria-label","Rename chat");edit.innerHTML='<i class="ph-bold ph-pencil-simple" aria-hidden="true"></i>';
+  edit.addEventListener("click",event=>{event.stopPropagation();const next=prompt("Chat name",c.title||"New chat");if(next!==null&&next.trim()){c.title=next.trim();renderChatList();}});
+  const remove=document.createElement("button");remove.type="button";remove.className="p-sidebar-touch__button";remove.title="Remove chat";remove.setAttribute("aria-label","Remove chat");remove.innerHTML='<i class="ph-bold ph-trash" aria-hidden="true"></i>';
+  remove.addEventListener("click",event=>{event.stopPropagation();if(!confirm("Remove this chat?"))return;const index=chats.findIndex(x=>x.id===c.id);chats.splice(index,1);if(activeChatId===c.id){const next=chats[0];activeChatId=next?.id||null;messages=next?.messages||[];if(!next)startNewChat();}render();});
+  const open=()=>{syncActiveChat();activeChatId=c.id;messages=c.messages||[];chatStarted=true;composerOpen=false;pendingCharts=[];setVisible($("chatMenu"),false);setError("");render();};
+  row.addEventListener("click",open);
+  row.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();open();}});
+  row.append(icon,title,edit,remove);list.append(row);
  });
 }
-function render(){syncChartTheme();setup.hidden=connected;$("topbar").hidden=!connected||!chatStarted;$("workspace").hidden=!connected||!chatStarted;$("toolbar").hidden=!connected||!chatStarted;chat.hidden=!connected||!chatStarted||composerOpen;composeView.hidden=!composerOpen;$("cancelComposeButton").hidden=!composerOpen;composeButton.hidden=!connected||!chatStarted;composeButton.innerHTML=composerOpen?'<i class="ph-bold ph-paper-plane-tilt" aria-hidden="true"></i>':'<i class="ph-bold ph-pencil-simple" aria-hidden="true"></i>';composeButton.setAttribute("aria-label",composerOpen?"Send message":"Compose message");composeButton.title=composerOpen?"Send message":"Compose message";renderChatList();renderPendingCharts();renderMessages();}
+function render(){
+ syncChartTheme();
+ setVisible(setup,!connected);
+ setVisible($("topbar"),connected&&chatStarted);
+ setVisible($("workspace"),connected&&chatStarted);
+ setVisible($("toolbar"),connected&&chatStarted);
+ setVisible(chat,connected&&chatStarted&&!composerOpen);
+ setVisible(composeView,connected&&chatStarted&&composerOpen);
+ setVisible($("cancelComposeButton"),composerOpen&&connected&&chatStarted);
+ setVisible(composeButton,connected&&chatStarted);
+ setVisible($("chatMenu"),!$("chatMenu").hidden&&connected&&chatStarted);
+ composeButton.innerHTML=composerOpen?'<i class="ph-bold ph-paper-plane-tilt" aria-hidden="true"></i>':'<i class="ph-bold ph-plus" aria-hidden="true"></i>';
+ composeButton.setAttribute("aria-label",composerOpen?"Send charts":"Add chart");
+ composeButton.title=composerOpen?"Send charts":"Add chart";
+ renderChatList();renderPendingCharts();renderMessages();
+}
 function chartValidationError(chart){
  const data=chart?.config?.data;const datasets=data?.datasets||[];
  if(!datasets.length)return "Add at least one data series.";
@@ -74,7 +99,7 @@ function renderPendingCharts(){
   actions.append(action("","Move up",i===0,()=>{[pendingCharts[i-1],pendingCharts[i]]=[pendingCharts[i],pendingCharts[i-1]];renderPendingCharts();}),action("","Move down",i===pendingCharts.length-1,()=>{[pendingCharts[i+1],pendingCharts[i]]=[pendingCharts[i],pendingCharts[i+1]];renderPendingCharts();}),action("","Remove chart",false,()=>{pendingCharts.splice(i,1);renderPendingCharts();}));top.append(name,actions);
   const title=document.createElement("input");title.type="text";title.className="p-field p-field-touch p-field-touch-filled";title.maxLength=100;title.placeholder="Chart title";title.value=c.title||"";title.setAttribute("aria-label","Chart title");
   const editor=document.createElement("div");editor.className="p-container";const status=document.createElement("p");status.className="p-list-touch-footer";status.setAttribute("role","status");const preview=document.createElement("div");preview.className="p-container";const canvas=document.createElement("canvas");canvas.setAttribute("role","img");canvas.setAttribute("aria-label",chartInfo[c.type].title+" preview");preview.append(canvas);const datasets=c.config.data.datasets;
-  const field=(value,placeholder,change,type="text")=>{const input=document.createElement("input");input.className="p-field p-field-touch";input.type=type;input.value=value??"";input.placeholder=placeholder;input.setAttribute("aria-label",placeholder);input.addEventListener("input",()=>change(type==="number"?(input.value===""?null:Number(input.value)):input.value));return input;};
+  const field=(value,placeholder,change,type="text")=>{const input=document.createElement("input");input.className="p-field p-field-touch p-field-touch-filled";input.type=type;input.value=value??"";input.placeholder=placeholder;input.setAttribute("aria-label",placeholder);input.style.width="100%";input.style.minWidth="0";input.autocomplete="off";if(type==="number"){input.step="any";input.inputMode="decimal";}input.addEventListener("input",()=>change(type==="number"?(input.value===""?null:Number(input.value)):input.value));return input;};
   const update=()=>{const validation=chartValidationError(c);c.dataError=!!validation;status.textContent=validation;const old=pendingChartInstances.find(x=>x.canvas===canvas);if(old){old.destroy();pendingChartInstances.splice(pendingChartInstances.indexOf(old),1);}if(typeof Chart==="undefined"){if(!validation)status.textContent="Chart preview is unavailable, but the chart can still be sent.";return;}try{pendingChartInstances.push(new Chart(canvas,chartConfig(c)));}catch(err){if(!validation)status.textContent="Preview unavailable: "+err.message;}};
   title.addEventListener("input",()=>{c.title=title.value;if(c.type==="duplication")datasets[0].label=title.value;name.textContent=chartInfo[c.type].title+(c.title?" — "+c.title:"");update();});
   if(["avoidance","lossPrevention","lossReduction","separation"].includes(c.type)){
@@ -104,7 +129,6 @@ function renderMessages(){
   const item=document.createElement("li");item.className="p-list-row";
   const label=document.createElement("div");label.className="p-list-label";const meta=document.createElement("time");meta.className="p-list-subtitle";meta.dateTime=new Date(m.timestamp).toISOString();meta.textContent=new Date(m.timestamp).toLocaleString();label.append(meta);item.append(label);
   const charts=m.kind==="risk-chart"?(m.charts?.length?m.charts:(m.chart?[m.chart]:[])):(m.kind==="chat-message"&&Array.isArray(m.charts)?m.charts:[]);
-  if(m.kind==="chat-message"&&m.text){const body=document.createElement("span");body.className="p-list-title";body.textContent=m.text;label.append(body);}
   if(charts.length){
    for(const c of charts){
     const card=document.createElement("section");card.className="p-container";
@@ -114,21 +138,20 @@ function renderMessages(){
     try{renderedCharts.push(new Chart(canvas,c.config?chartConfig(c):legacyChartConfig(c)));}catch(e){const p=document.createElement("p");p.textContent="Chart display error: "+e.message;card.append(p);}
    }
    
-  }else if(m.kind!=="chat-message"){const body=document.createElement("span");body.className="p-list-title";body.textContent=m.text||"";label.append(body);}
+  }
   messagesEl.append(item);
  }
  messagesEl.scrollTop=messagesEl.scrollHeight;
 }
 function receive(raw){
- let m;
- try{
-  const d=JSON.parse(raw);
-  const incoming=d?.charts?.length?d.charts:(d?.chart?[d.chart]:[]);
-  if(d?.kind==="risk-chart"&&incoming.length&&incoming.every(c=>c&&(c.config?.type||Array.isArray(c.labels))))m={kind:"risk-chart",charts:incoming,caption:typeof d.caption==="string"?d.caption:"",timestamp:Number(d.timestamp)||Date.now(),mine:false};
-  else if(d?.kind==="chat-message"&&typeof d.text==="string")m={kind:"chat-message",text:d.text,charts:Array.isArray(d.charts)?d.charts.filter(c=>c&&c.config?.type):[],timestamp:Number(d.timestamp)||Date.now(),mine:false};
-  else m={kind:"text",text:String(raw),timestamp:Date.now(),mine:false};
- }catch{m={kind:"text",text:String(raw),timestamp:Date.now(),mine:false};}
- messages.push(m);renderMessages();renderChatList();
+ let data;
+ try{data=JSON.parse(raw);}catch{setError("Received an unsupported message.");return;}
+ const incoming=data?.charts?.length?data.charts:(data?.chart?[data.chart]:[]);
+ if(data?.kind!=="risk-chart"||!incoming.length||!incoming.every(c=>c&&(c.config?.type||Array.isArray(c.labels)))){
+  setError("Received an unsupported message.");return;
+ }
+ const message={kind:"risk-chart",charts:incoming,timestamp:Number(data.timestamp)||Date.now(),mine:false};
+ messages.push(message);setError("");renderMessages();renderChatList();
 }
 peer=createP2P({
  onMessage:receive,
@@ -136,7 +159,7 @@ peer=createP2P({
  onConnectionState:s=>{
   const was=connected;connected=s.connected;
   if(connected&&!was){chatStarted=false;composerOpen=false;pendingCharts=[];startNewChat();}
-  if(!connected){chatStarted=false;composerOpen=false;$("chatMenu").hidden=true;}
+  if(!connected){chatStarted=false;composerOpen=false;setVisible($("chatMenu"),false);}
   render();
  },
  onError:setError
@@ -174,14 +197,16 @@ paste.addEventListener("input",()=>{if(paste.value.trim().endsWith("}"))processP
 
 $("newChatTopButton").addEventListener("click",()=>{$("chatMenu").hidden=true;startNewChat();});
 $("openChatButton").addEventListener("click",()=>$("loadChatFile").click());
-$("chatMenuButton").addEventListener("click",()=>{$("chatMenu").hidden=!$("chatMenu").hidden;});
-document.addEventListener("click",e=>{if(!$("chatMenu").contains(e.target)&&!$("chatMenuButton").contains(e.target))$("chatMenu").hidden=true;});
+$("chatMenuButton").addEventListener("click",()=>{setVisible($("chatMenu"),$("chatMenu").style.display==="none");});
+$("sidebarCloseButton").addEventListener("click",()=>setVisible($("chatMenu"),false));
+$("sidebarNewChat").addEventListener("click",()=>{setVisible($("chatMenu"),false);startNewChat();});
+document.addEventListener("click",e=>{if(!$("chatMenu").contains(e.target)&&!$("chatMenuButton").contains(e.target))setVisible($("chatMenu"),false);});
 $("cancelComposeButton").addEventListener("click",()=>{composerOpen=false;setError("");render();});
 $("loadChatFile").addEventListener("change",async e=>{
  const file=e.target.files?.[0];if(!file)return;
  try{
   const data=JSON.parse(await file.text());
-  const validMessages=items=>items.filter(m=>m&&((m.kind==="risk-chart"&&(Array.isArray(m.charts)||m.chart))||(m.kind==="chat-message"&&typeof m.text==="string")||typeof m.text==="string")).map(m=>({...m,mine:!!m.mine,timestamp:Number(m.timestamp)||Date.now()}));
+  const validMessages=items=>items.filter(m=>m&&m.kind==="risk-chart"&&(Array.isArray(m.charts)||m.chart)).map(m=>({...m,mine:!!m.mine,timestamp:Number(m.timestamp)||Date.now()}));
   if(Array.isArray(data.chats)){chats=data.chats.filter(c=>c&&Array.isArray(c.messages)).map((c,i)=>({...c,id:c.id||chatId(),title:c.title||"Chat "+(i+1),messages:validMessages(c.messages)}));if(!chats.length)throw Error("No chats found in this file.");activeChatId=chats.some(c=>c.id===data.activeChatId)?data.activeChatId:chats[0].id;messages=activeChat().messages;}
   else if(Array.isArray(data.messages)){messages=validMessages(data.messages);chats=[{id:chatId(),title:"Imported chat",createdAt:Date.now(),messages}];activeChatId=chats[0].id;}
   else throw Error("Invalid chat file.");
@@ -193,19 +218,16 @@ $("saveChatButton").addEventListener("click",()=>{syncActiveChat();const data={f
 
 composeButton.addEventListener("click",()=>{
  if(!composerOpen){composerOpen=true;setError("");render();return;}
- const textValue=messageDraft.value.trim();
- if(!textValue&&!pendingCharts.length){setError("Write a message or add a chart before sending.");return;}
- if(!peer.isConnected()){setError("The peer connection is not open yet. Wait for it to connect and try again.");return;}
- const invalid=pendingCharts.find(c=>chartValidationError(c));
+ if(!pendingCharts.length){setError("Add at least one chart before sending.");return;}
+ if(!peer.isConnected()){setError("The peer data channel is not open. Reconnect before sending.");return;}
+ const invalid=pendingCharts.find(chart=>chartValidationError(chart));
  if(invalid){setError(chartValidationError(invalid));return;}
- const timestamp=Date.now();
- const charts=pendingCharts.map(c=>({...c,config:JSON.parse(JSON.stringify(c.config))}));
- const message=charts.length&&textValue?{kind:"chat-message",text:textValue,charts,timestamp}:charts.length?{kind:"risk-chart",charts,timestamp}:{kind:"chat-message",text:textValue,timestamp};
+ const message={kind:"risk-chart",charts:pendingCharts.map(chart=>({...chart,config:JSON.parse(JSON.stringify(chart.config))})),timestamp:Date.now()};
  try{
   peer.sendMessage(JSON.stringify(message));
   messages.push({...message,mine:true});
-  messageDraft.value="";pendingCharts=[];composerOpen=false;setError("");render();
- }catch(e){setError(e.message||"Message could not be sent.");}
+  pendingCharts=[];composerOpen=false;setError("");render();
+ }catch(error){setError("Could not send charts: "+(error?.message||"The connection failed."));}
 });
 $("composeView").addEventListener("click",event=>{
  const button=event.target.closest("[data-chart]");
