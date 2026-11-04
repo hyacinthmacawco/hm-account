@@ -48,37 +48,63 @@ function renderPendingCharts(){
  pendingCharts.forEach((c,i)=>{
   const card=document.createElement("article");card.className="pending-chart-card";
   const top=document.createElement("div");top.className="pending-chart-heading";
-  const name=document.createElement("strong");name.textContent=chartInfo[c.type].title+" — "+c.title;
+  const name=document.createElement("strong");name.textContent=chartInfo[c.type].title+(c.title?" — "+c.title:"");
   const actions=document.createElement("div");actions.className="pending-chart-actions";
-  const makeAction=(label,title,disabled,fn)=>{const button=document.createElement("button");button.type="button";button.textContent=label;button.title=title;button.disabled=disabled;button.addEventListener("click",fn);return button;};
-  actions.append(
-   makeAction("↑","Move chart up",i===0,()=>{[pendingCharts[i-1],pendingCharts[i]]=[pendingCharts[i],pendingCharts[i-1]];renderPendingCharts();}),
-   makeAction("↓","Move chart down",i===pendingCharts.length-1,()=>{[pendingCharts[i+1],pendingCharts[i]]=[pendingCharts[i],pendingCharts[i+1]];renderPendingCharts();}),
-   makeAction("×","Remove chart",false,()=>{pendingCharts.splice(i,1);renderPendingCharts();})
-  );
+  const action=(symbol,label,disabled,fn)=>{const button=document.createElement("button");button.type="button";button.textContent=symbol;button.title=label;button.setAttribute("aria-label",label);button.disabled=disabled;button.addEventListener("click",fn);return button;};
+  actions.append(action("↑","Move chart up",i===0,()=>{[pendingCharts[i-1],pendingCharts[i]]=[pendingCharts[i],pendingCharts[i-1]];renderPendingCharts();}),action("↓","Move chart down",i===pendingCharts.length-1,()=>{[pendingCharts[i+1],pendingCharts[i]]=[pendingCharts[i],pendingCharts[i+1]];renderPendingCharts();}),action("×","Remove chart",false,()=>{pendingCharts.splice(i,1);renderPendingCharts();}));
   top.append(name,actions);
-  const title=document.createElement("input");title.type="text";title.maxLength=100;title.placeholder="Chart title";title.value=c.title;title.setAttribute("aria-label","Chart title");
-  title.addEventListener("input",()=>{c.title=title.value;name.textContent=chartInfo[c.type].title+" — "+c.title;});
-  const context=document.createElement("textarea");context.rows=2;context.placeholder="What does this chart represent?";context.value=c.context||"";context.setAttribute("aria-label","Chart context");
-  context.addEventListener("input",()=>{c.context=context.value;});
-  const dataLabel=document.createElement("label");dataLabel.className="chart-data-label";dataLabel.textContent="Edit chart data (JSON)";
-  const data=document.createElement("textarea");data.className="chart-data-editor";data.rows=7;data.spellcheck=false;data.value=JSON.stringify(c.config.data,null,2);data.setAttribute("aria-label","Chart data JSON");
+  const title=document.createElement("input");title.type="text";title.maxLength=100;title.placeholder="Chart title";title.value=c.title||"";title.setAttribute("aria-label","Chart title");
+  title.addEventListener("input",()=>{c.title=title.value;name.textContent=chartInfo[c.type].title+(c.title?" — "+c.title:"");});
+  const editor=document.createElement("div");editor.className="chart-data-fields";
   const status=document.createElement("p");status.className="chart-edit-error";status.setAttribute("role","status");
-  const preview=document.createElement("div");preview.className="inline-chart-preview";const canvas=document.createElement("canvas");canvas.setAttribute("role","img");canvas.setAttribute("aria-label",c.title+" preview");preview.append(canvas);
-  let instance;
-  try{instance=new Chart(canvas,chartConfig(c));pendingChartInstances.push(instance);}catch(e){status.textContent="Preview error: "+e.message;}
-  data.addEventListener("change",()=>{
-   try{const parsed=JSON.parse(data.value);if(!parsed||!Array.isArray(parsed.datasets))throw Error("Data must contain a datasets array.");c.config.data=parsed;c.dataError=false;status.textContent="";
-    if(instance){instance.destroy();const idx=pendingChartInstances.indexOf(instance);if(idx>=0)pendingChartInstances.splice(idx,1);}
-    instance=new Chart(canvas,chartConfig(c));pendingChartInstances.push(instance);
-   }catch(e){c.dataError=true;status.textContent="Invalid chart data: "+e.message;}
-  });
-  card.append(top,title,context,dataLabel,data,status,preview);holder.append(card);
+  const preview=document.createElement("div");preview.className="inline-chart-preview";const canvas=document.createElement("canvas");canvas.setAttribute("role","img");canvas.setAttribute("aria-label",chartInfo[c.type].title+" preview");preview.append(canvas);
+  const pointChart=["scatter","bubble"].includes(c.config.type),datasets=c.config.data.datasets;
+  const field=(value,placeholder,change,type="text")=>{const input=document.createElement("input");input.type=type;input.value=value??"";input.placeholder=placeholder;input.addEventListener("input",()=>change(type==="number"?(input.value===""?null:Number(input.value)):input.value));return input;};
+  const update=()=>{
+   try{
+    if(!datasets.length||datasets.some(ds=>!ds.data?.length))throw Error("Each data series must contain at least one data point.");
+    const old=pendingChartInstances.find(chart=>chart.canvas===canvas);if(old){old.destroy();pendingChartInstances.splice(pendingChartInstances.indexOf(old),1);}
+    pendingChartInstances.push(new Chart(canvas,chartConfig(c)));c.dataError=false;status.textContent="";
+   }catch(e){c.dataError=true;status.textContent=e.message;}
+  };
+  if(!pointChart){
+   const labels=c.config.data.labels||[];
+   const rows=document.createElement("div");rows.className="chart-data-rows";
+   const head=document.createElement("div");head.className="chart-data-row chart-data-row-head";
+   const cat=document.createElement("span");cat.textContent="Category";head.append(cat);
+   datasets.forEach((ds)=>{const span=document.createElement("span");span.textContent=ds.label||"Value";head.append(span);});
+   head.append(document.createElement("span"));rows.append(head);
+   labels.forEach((label,index)=>{
+    const row=document.createElement("div");row.className="chart-data-row";
+    row.append(field(label,"Category",v=>{c.config.data.labels[index]=v;update();}));
+    datasets.forEach(ds=>row.append(field(ds.data[index],"Value",v=>{ds.data[index]=v;update();},"number")));
+    row.append(action("×","Remove row",labels.length<=2,()=>{c.config.data.labels.splice(index,1);datasets.forEach(ds=>ds.data.splice(index,1));renderPendingCharts();}));rows.append(row);
+   });
+   rows.append(action("+","Add category",false,()=>{c.config.data.labels.push("New category");datasets.forEach(ds=>ds.data.push(0));renderPendingCharts();}));
+   editor.append(rows);
+  }else{
+   datasets.forEach((ds,di)=>{
+    const section=document.createElement("section");section.className="chart-series";
+    const label=document.createElement("label");label.textContent="Series "+(di+1);section.append(label);
+    section.append(field(ds.label,"Series name",v=>{ds.label=v;update();}));
+    const rows=document.createElement("div");rows.className="chart-data-rows";
+    const head=document.createElement("div");head.className="chart-data-row chart-data-row-head";
+    ["X value","Y value",...(c.config.type==="bubble"?["Size"]:[])," "].forEach(t=>{const span=document.createElement("span");span.textContent=t;head.append(span);});rows.append(head);
+    ds.data.forEach((point,pi)=>{
+     const row=document.createElement("div");row.className="chart-data-row";
+     ["x","y",...(c.config.type==="bubble"?["r"]:[])].forEach(k=>row.append(field(point[k],k.toUpperCase(),v=>{point[k]=v;update();},"number")));
+     row.append(action("×","Remove point",ds.data.length<=1,()=>{ds.data.splice(pi,1);renderPendingCharts();}));rows.append(row);
+    });
+    rows.append(action("+","Add point",false,()=>{ds.data.push(c.config.type==="bubble"?{x:0,y:0,r:5}:{x:0,y:0});renderPendingCharts();}));
+    section.append(rows);editor.append(section);
+   });
+  }
+  card.append(top,title,editor,status,preview);holder.append(card);update();
  });
 }
 function addChartToCompose(key){
  if(!chartInfo[key])return;
- pendingCharts.push({type:key,title:chartInfo[key].title,context:"",config:helpExampleConfig(key)});
+ pendingCharts.push({type:key,title:"",config:helpExampleConfig(key)});
  renderPendingCharts();
 }
 function renderMessages(){
@@ -91,12 +117,12 @@ function renderMessages(){
   if(charts.length){
    for(const c of charts){
     const card=document.createElement("div");card.className="chart-message";
-    const h=document.createElement("h3");h.textContent=c.title||"Risk chart";card.append(h);
-    if(c.context){const p=document.createElement("p");p.className="chart-context";p.textContent=c.context;card.append(p);}
+    const h=document.createElement("h3");h.textContent=c.title||chartInfo[c.type]?.title||"Risk chart";card.append(h);
+    
     const canvas=document.createElement("canvas");canvas.setAttribute("role","img");canvas.setAttribute("aria-label",(c.title||"Risk")+" chart");card.append(canvas);item.append(card);
     try{renderedCharts.push(new Chart(canvas,c.config?chartConfig(c):legacyChartConfig(c)));}catch(e){const p=document.createElement("p");p.textContent="Chart display error: "+e.message;card.append(p);}
    }
-   if(m.caption){const p=document.createElement("p");p.className="message-caption";p.textContent=m.caption;item.append(p);}
+   
   }else{const body=document.createElement("div");body.textContent=m.text||"";item.append(body);}
   messagesEl.append(item);
  }
@@ -107,7 +133,7 @@ function receive(raw){
  try{
   const d=JSON.parse(raw);
   const incoming=d?.charts?.length?d.charts:(d?.chart?[d.chart]:[]);
-  if(d?.kind==="risk-chart"&&incoming.length&&incoming.every(c=>c&&Array.isArray(c.labels)&&Array.isArray(c.values)))m={kind:"risk-chart",charts:incoming,caption:typeof d.caption==="string"?d.caption:"",timestamp:Number(d.timestamp)||Date.now(),mine:false};
+  if(d?.kind==="risk-chart"&&incoming.length&&incoming.every(c=>c&&(c.config?.type||Array.isArray(c.labels))))m={kind:"risk-chart",charts:incoming,caption:typeof d.caption==="string"?d.caption:"",timestamp:Number(d.timestamp)||Date.now(),mine:false};
   else if(d?.kind==="chat-message"&&typeof d.text==="string")m={kind:"text",text:d.text,timestamp:Number(d.timestamp)||Date.now(),mine:false};
   else m={kind:"text",text:String(raw),timestamp:Date.now(),mine:false};
  }catch{m={kind:"text",text:String(raw),timestamp:Date.now(),mine:false};}
