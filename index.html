@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="color-scheme" content="light dark">
   <title>HM Account</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@codedgar/puppertino@2.0.0/dist/css/puppertino.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@codedgar/puppertino@2.0.0/dist/css/puppertino-mobile.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/bold/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   <script type="module" src="https://cdn.jsdelivr.net/npm/@codedgar/puppertino@2.0.0/src/js/modals.js"></script>
 </head>
-<body class="p-type p-auto-dark-mode" style="--p-color-current:#1769e0">
+<body class="p-type p-auto-dark-mode" style="--p-control-accent:#1769e0;--p-button-default-tint:#1769e0;color-scheme:light dark">
 <main id="app">
   <section id="setupView" class="p-container p-pane-scroll" aria-label="Connect">
     <p>Connect directly to another person.</p>
@@ -24,13 +24,13 @@
     <p id="error" role="status" aria-live="polite"></p>
   </section>
 
-  <header id="topbar" class="p-nav-bar p-nav-bar-filled p-nav-bar-bordered" aria-label="Chat navigation" hidden>
+  <header id="topbar" class="p-nav-bar p-nav-bar-filled" aria-label="Chat navigation" hidden>
     <div class="p-nav-bar__row">
       <div class="p-nav-bar__group">
         <button id="chatMenuButton" class="p-nav-bar__button" type="button" aria-label="Chats" title="Chats"><i class="ph-bold ph-list" aria-hidden="true"></i></button>
         <button id="newChatTopButton" class="p-nav-bar__button" type="button" aria-label="New chat" title="New chat"><i class="ph-bold ph-pencil-simple" aria-hidden="true"></i></button>
       </div>
-      <h1 class="p-nav-bar__title">HM Account</h1>
+      <h1 class="p-nav-bar__title">Messages</h1>
       <div class="p-nav-bar__group">
         <button id="openChatButton" class="p-nav-bar__button" type="button" aria-label="Open chat" title="Open chat"><i class="ph-bold ph-folder-open" aria-hidden="true"></i></button>
         <button id="saveChatButton" class="p-nav-bar__button" type="button" aria-label="Save chats" title="Save chats"><i class="ph-bold ph-floppy-disk" aria-hidden="true"></i></button>
@@ -46,19 +46,20 @@
       <ul id="messages" class="p-list p-list-touch" aria-live="polite"></ul>
     </section>
     <section id="composeView" class="p-container" hidden>
-      <div id="pendingCharts"></div>
+      <ul id="pendingCharts" class="p-list p-list-touch p-list-inset"></ul>
       <div>
-        <h2>Risk management charts</h2>
-        <ul class="p-list p-list-touch">
-          <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="avoidance" type="button">Avoidance</button></li>
-          <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="lossPrevention" type="button">Loss prevention</button></li>
-          <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="lossReduction" type="button">Loss reduction</button></li>
-          <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="duplication" type="button">Duplication</button></li>
-          <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="separation" type="button">Separation</button></li>
-          <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="diversification" type="button">Diversification</button></li>
+        <h2 class="p-list-touch-header p-list-touch-header--prominent">Add a chart</h2>
+        <ul class="p-list p-list-touch p-list-inset">
+          <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="avoidance" type="button"><span class="p-list-label"><span class="p-list-title">Avoidance</span></span><i class="ph-bold ph-plus-circle p-list-trailing-icon" aria-hidden="true"></i></button></li>
+          <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="lossPrevention" type="button"><span class="p-list-label"><span class="p-list-title">Loss prevention</span></span><i class="ph-bold ph-plus-circle p-list-trailing-icon" aria-hidden="true"></i></button></li>
+          <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="lossReduction" type="button"><span class="p-list-label"><span class="p-list-title">Loss reduction</span></span><i class="ph-bold ph-plus-circle p-list-trailing-icon" aria-hidden="true"></i></button></li>
+          <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="duplication" type="button"><span class="p-list-label"><span class="p-list-title">Duplication</span></span><i class="ph-bold ph-plus-circle p-list-trailing-icon" aria-hidden="true"></i></button></li>
+          <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="separation" type="button"><span class="p-list-label"><span class="p-list-title">Separation</span></span><i class="ph-bold ph-plus-circle p-list-trailing-icon" aria-hidden="true"></i></button></li>
+          <li class="p-list-row"><button class="p-button p-button-touch p-button-borderless chart-tool" data-chart="diversification" type="button"><span class="p-list-label"><span class="p-list-title">Diversification</span></span><i class="ph-bold ph-plus-circle p-list-trailing-icon" aria-hidden="true"></i></button></li>
         </ul>
         <button id="helpButton" class="p-button p-button-touch p-button-secondary" type="button" data-p-open-modal="#helpSheet">Chart help</button>
       </div>
+    </div>
     </section>
   </section>
 
