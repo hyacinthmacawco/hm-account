@@ -3,7 +3,8 @@ const $=id=>document.getElementById(id);
 const setup=$("setupView"),choice=$("chatChoice"),chat=$("chat"),qr=$("qrCode"),paste=$("pasteCode");
 const messagesEl=$("messages"),composeView=$("composeView"),composeText=$("composeText"),composeButton=$("composeButton"),errorEl=$("error");
 let connected=false,chatStarted=false,localCode="",stage="offer",composerOpen=false,messages=[],pendingCharts=[],peer,editorChart=null,activeChartKey=null;
-const renderedCharts=[];\nlet helpCharts=[];
+const renderedCharts=[];
+let helpCharts=[];
 const chartInfo={
  avoidance:{title:"Avoidance",description:"Avoidance means not undertaking or abandoning a loss exposure. Examples include locating a facility outside a flood zone or withdrawing a product with dangerous side effects. It eliminates the exposure where feasible.",style:"radar"},
  lossPrevention:{title:"Loss prevention",description:"Loss prevention reduces the frequency of a particular loss. Examples include driver training, prohibiting alcohol or drug use while driving, and enforcing safety rules.",style:"line"},
@@ -22,6 +23,7 @@ function chartConfig(c){
 function render(){
  setup.hidden=connected;
  choice.hidden=!connected||chatStarted;
+ $("toolbar").hidden=!connected||!chatStarted;
  chat.hidden=!connected||!chatStarted;
  composeView.hidden=!composerOpen;
  $("saveChatButton").hidden=!connected||!chatStarted;
@@ -90,13 +92,26 @@ peer=createP2P({
 });
 function renderConnectionCode(){
  qr.replaceChildren();
- if(localCode&&typeof QRCode!=="undefined")new QRCode(qr,{text:localCode,width:260,height:260,correctLevel:QRCode.CorrectLevel.L});
+ if(localCode){
+  if(typeof QRCode!=="undefined"){
+   try{new QRCode(qr,{text:localCode,width:260,height:260,correctLevel:QRCode.CorrectLevel.L});}
+   catch(e){setError("Could not display the QR code: "+e.message);}
+  }else{
+   setError("QR library did not load. You can still copy the connection code.");
+  }
+ }
  $("copyCode").textContent=stage==="answer"?"Copy Answer":"Copy Request";
  paste.hidden=stage==="answer";$("copyCode").hidden=!localCode;
 }
 $("copyCode").addEventListener("click",async()=>{
- try{await navigator.clipboard.writeText(localCode);$("copyCode").textContent="Copied";}
- catch{setError("Clipboard unavailable. Copy the connection code manually.");}
+ try{
+  if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(localCode);
+  else throw new Error("Clipboard API unavailable");
+  $("copyCode").textContent="Copied";
+ }catch{
+  paste.hidden=false;paste.value=localCode;paste.focus();paste.select();
+  setError("Copy is unavailable here. The connection code is selected below for manual copying.");
+ }
 });
 async function processPaste(){
  const value=paste.value.trim();if(!value)return;
@@ -210,4 +225,6 @@ $("helpButton").addEventListener("click",()=>{
  $("helpDialog").hidden=false;
 });
 document.addEventListener("keydown",e=>{if(e.key==="Escape")document.querySelectorAll(".dialog").forEach(closeDialog);});
-render();peer.createOffer();
+render();
+if(typeof RTCPeerConnection==="undefined"){setError("WebRTC is not supported in this browser.");}
+else peer.createOffer();
