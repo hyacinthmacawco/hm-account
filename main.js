@@ -135,7 +135,7 @@ function renderMessages(){
     const card=document.createElement("section");card.className="p-container";
     const h=document.createElement("h3");h.textContent=c.title||chartInfo[c.type]?.title||"Risk chart";card.append(h);
     
-    const canvas=document.createElement("canvas");canvas.setAttribute("role","img");canvas.setAttribute("aria-label",(c.title||"Risk")+" chart");card.append(canvas);item.append(card);
+    const preview=document.createElement("div");preview.className="chat-chart-preview";const canvas=document.createElement("canvas");canvas.setAttribute("role","img");canvas.setAttribute("aria-label",(c.title||"Risk")+" chart");preview.append(canvas);card.append(preview);item.append(card);
     try{renderedCharts.push(new Chart(canvas,c.config?chartConfig(c):legacyChartConfig(c)));}catch(e){const p=document.createElement("p");p.textContent="Chart display error: "+e.message;card.append(p);}
    }
    
