@@ -498,143 +498,82 @@ textarea {
     --app-page-gutter: 12px;
   }
 
-  #topbar .p-nav-bar__row {
-    gap: 4px;
-    padding-inline: 8px;
-  }
 
-  #topbar .p-nav-bar__group {
-    gap: 0;
-  }
-
-  #topbar .p-nav-bar__title {
-    font-size: clamp(0.95rem, 4vw, 1.15rem);
-  }
-
-  #workspace {
-    padding-inline: 0;
-  }
-
-  #chatMenu {
-    left: 8px;
-    width: min(340px, calc(100vw - 16px));
-  }
-
-  #messages > .p-list-row {
-    padding: 12px 8px;
-  }
-
-  #composeView > .p-container {
-    padding: 12px 8px;
-  }
-
-  #chartDescriptions {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
-  }
-
-  #chartDescriptions .p-container {
-    height: 220px;
-  }
-
-  #toolbar {
-    padding-inline: 8px;
-  }
-}
-
-@media (max-width: 380px) {
-  #topbar .p-nav-bar__button {
-    padding-inline: 7px;
-  }
-
-  #topbar .p-nav-bar__title {
-    margin-inline: 0;
-    font-size: 0.9rem;
-  }
-
-  #setupView {
-    padding: 14px;
-  }
-}
-
-@media (min-width: 1000px) {
-  #workspace {
-    padding-inline: max(var(--app-page-gutter), calc((100% - var(--app-content-width)) / 2));
-  }
-
-  #chatMenu {
-    left: max(var(--app-page-gutter), calc((100% - var(--app-content-width)) / 2));
-  }
-}
-
-
-/* Minimal navigation chrome and a compact, reliably clickable compose control */
-#topbar,
-#topbar.p-nav-bar {
-  background: transparent !important;
-  box-shadow: none !important;
-  border: 0 !important;
-}
-
-#topbar .p-nav-bar__row {
-  justify-content: space-between;
-}
-
-#topbar .p-nav-bar__title {
-  display: none !important;
-}
-
-#toolbar,
-#toolbar.p-toolbar-touch,
-#toolbar.p-toolbar-touch-fixed {
-  position: fixed !important;
-  inset: auto 0 0 auto !important;
-  z-index: 30;
+/* Chat actions stay in the sidebar row rather than floating above it. */
+#chatList .p-sidebar-row {
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  width: auto;
-  min-width: 0;
-  height: auto;
-  padding: 12px max(16px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) 12px;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
-  pointer-events: none;
+  gap: 6px;
+  padding-inline: 12px;
+}
+#chatList .chat-row-action {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+  flex: 0 0 34px;
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  margin: 0;
+  border-radius: 9px;
 }
 
-#toolbar > * {
-  pointer-events: auto;
-}
-
-#toolbar #composeButton {
+/* Top-bar controls use the same solid Puppertino button treatment as the
+   former prominent send control. Compose/send controls use liquid glass. */
+#topbar .p-nav-bar__button {
   display: inline-flex;
-  flex: 0 0 56px;
   align-items: center;
   justify-content: center;
-  width: 56px !important;
-  min-width: 56px;
-  max-width: 56px;
-  height: 56px;
-  min-height: 56px;
-  padding: 0 !important;
-  margin: 0;
-  border-radius: 50% !important;
-  aspect-ratio: 1;
-  font-size: 1.35rem;
-  line-height: 1;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0 11px;
+  border: 1px solid var(--p-separator, rgba(128,128,128,.28));
+  border-radius: 12px;
+  background: var(--p-button-primary-background, #1769e0);
+  color: #fff;
+  box-shadow: 0 2px 7px rgba(0,0,0,.14);
 }
+#topbar .p-nav-bar__button i { font-size: 1.15rem; }
 
-#toolbar #cancelComposeButton {
-  flex: 0 0 auto;
-  width: auto;
-  min-width: 0;
-  max-width: none;
-  margin: 0;
+#toolbar #composeButton {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--p-text-primary, #fff);
+  border: 1px solid rgba(255,255,255,.42) !important;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.42), rgba(255,255,255,.08) 48%, rgba(255,255,255,.2)),
+    rgba(120,140,170,.24) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+  box-shadow: 0 8px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.48);
+  text-shadow: 0 1px 2px rgba(0,0,0,.16);
+  touch-action: manipulation;
+  pointer-events: auto !important;
+  cursor: pointer;
 }
-
-#chat,
-#composeView {
-  padding-bottom: calc(104px + env(safe-area-inset-bottom));
+#toolbar #composeButton::before {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(145deg, rgba(255,255,255,.22), transparent 55%);
+  pointer-events: none;
+}
+#toolbar #composeButton:active { transform: scale(.96); }
+#toolbar #composeButton:focus-visible,
+#topbar .p-nav-bar__button:focus-visible {
+  outline: 2px solid var(--p-control-accent, #1769e0);
+  outline-offset: 3px;
+}
+@media (prefers-color-scheme: dark) {
+  #toolbar #composeButton {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,.22), rgba(255,255,255,.04) 48%, rgba(255,255,255,.12)),
+      rgba(30,35,45,.42) !important;
+    border-color: rgba(255,255,255,.24) !important;
+    color: #fff;
+  }
 }
