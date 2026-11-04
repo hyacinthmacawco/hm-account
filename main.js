@@ -3,7 +3,7 @@ const $=id=>document.getElementById(id);
 const setup=$("setupView"),choice=$("chatChoice"),chat=$("chat"),qr=$("qrCode"),paste=$("pasteCode");
 const messagesEl=$("messages"),composeView=$("composeView"),composeText=$("composeText"),composeButton=$("composeButton"),errorEl=$("error");
 let connected=false,chatStarted=false,localCode="",stage="offer",composerOpen=false,messages=[],pendingCharts=[],peer,editorChart=null,activeChartKey=null;
-const renderedCharts=[];
+const renderedCharts=[];\nlet helpCharts=[];
 const chartInfo={
  avoidance:{title:"Avoidance",description:"Avoidance means not undertaking or abandoning a loss exposure. Examples include locating a facility outside a flood zone or withdrawing a product with dangerous side effects. It eliminates the exposure where feasible.",style:"radar"},
  lossPrevention:{title:"Loss prevention",description:"Loss prevention reduces the frequency of a particular loss. Examples include driver training, prohibiting alcohol or drug use while driving, and enforcing safety rules.",style:"line"},
@@ -25,6 +25,9 @@ function render(){
  chat.hidden=!connected||!chatStarted;
  composeView.hidden=!composerOpen;
  $("saveChatButton").hidden=!connected||!chatStarted;
+ $("saveChatButton").innerHTML=composerOpen?'<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>':'<svg viewBox="0 0 24 24"><path d="M5 3h12l4 4v14H3V3z"/><path d="M7 3v6h10V3M7 21v-8h10v8"/></svg>';
+ $("saveChatButton").setAttribute("aria-label",composerOpen?"Cancel compose":"Save chat");
+ $("saveChatButton").title=composerOpen?"Cancel compose":"Save chat";
  composeButton.hidden=!connected||!chatStarted;
  composeButton.innerHTML=composerOpen?'<svg viewBox="0 0 24 24"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>':'<svg viewBox="0 0 24 24"><path d="m4 20 4.5-1 11-11a2.1 2.1 0 0 0-3-3l-11 11L4 20Z"/><path d="m14.5 6.5 3 3"/></svg>';
  composeButton.setAttribute("aria-label",composerOpen?"Send chart message":"Compose chart message");
@@ -118,6 +121,9 @@ $("loadChatFile").addEventListener("change",async e=>{
  finally{e.target.value="";}
 });
 $("saveChatButton").addEventListener("click",()=>{
+ if(composerOpen){
+  composerOpen=false;pendingCharts=[];composeText.value="";setError("");render();return;
+ }
  const data={format:"hm-account-chat",version:3,messages};
  const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
  const a=document.createElement("a");a.href=url;a.download="hm-account-chat.json";a.click();URL.revokeObjectURL(url);
@@ -166,11 +172,26 @@ function closeDialog(d){
 }
 document.querySelectorAll(".dialog-close").forEach(b=>b.addEventListener("click",()=>closeDialog(b.closest(".dialog"))));
 document.querySelectorAll(".dialog").forEach(d=>d.addEventListener("click",e=>{if(e.target===d)closeDialog(d);}));
+function helpExampleConfig(key){
+ const examples={
+  avoidance:{type:"radar",data:{labels:["Exposure 1","Exposure 2","Exposure 3"],datasets:[{label:"Remaining exposure",data:[1,10,5],backgroundColor:"rgba(23,105,224,.2)",borderColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false}},
+  lossPrevention:{type:"bar",data:{labels:["Driver training","No alcohol or drugs","Safety rules"],datasets:[{label:"Before",data:[40,100,30],backgroundColor:"#9bbce9"},{label:"After",data:[20,50,10],backgroundColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false}},
+  lossReduction:{type:"doughnut",data:{labels:["Fire damage","Sprinklers","First aid","Fire service"],datasets:[{data:[1,40,30,29],backgroundColor:["#d65a5a","#1769e0","#4f9b78","#e8b65b"]}]},options:{responsive:true,maintainAspectRatio:false}},
+  duplication:{type:"scatter",data:{datasets:[{label:"Available spare tires",data:[{x:10,y:20},{x:15,y:20},{x:50,y:40}],backgroundColor:"#1769e0"}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:"Storage location"}},y:{title:{display:true,text:"Availability"}}}}},
+  separation:{type:"bar",data:{labels:["January","February","March"],datasets:[{label:"Section 1",data:[40,100,30],backgroundColor:"#1769e0"},{label:"Section 2",data:[20,50,10],backgroundColor:"#8ab2e8"}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true}}}},
+  diversification:{type:"bubble",data:{datasets:[{label:"Stocks",data:[{x:20,y:10,r:7},{x:22,y:12,r:5}],backgroundColor:"#1769e0"},{label:"Bonds",data:[{x:50,y:40,r:4},{x:60,y:22,r:6}],backgroundColor:"#69a98b"}]},options:{responsive:true,maintainAspectRatio:false,plugins:{tooltip:{callbacks:{label:c=>`Exposure ${c.raw.x}, return ${c.raw.y}`}}}}}
+ };
+ return examples[key];
+}
 $("helpButton").addEventListener("click",()=>{
  const list=$("chartDescriptions");list.replaceChildren();
- for(const info of Object.values(chartInfo)){
-  const article=document.createElement("article"),h=document.createElement("h3"),p=document.createElement("p");
-  h.textContent=info.title;p.textContent=info.description;article.append(h,p);list.append(article);
+ while(helpCharts.length)helpCharts.pop().destroy();
+ for(const [key,info] of Object.entries(chartInfo)){
+  const article=document.createElement("article"),h=document.createElement("h3"),p=document.createElement("p"),wrap=document.createElement("div"),canvas=document.createElement("canvas");
+  h.textContent=info.title;p.textContent=info.description;wrap.className="help-chart-wrap";
+  canvas.setAttribute("role","img");canvas.setAttribute("aria-label",info.title+" example chart");
+  wrap.append(canvas);article.append(h,p,wrap);list.append(article);
+  try{helpCharts.push(new Chart(canvas,helpExampleConfig(key)));}catch(e){const error=document.createElement("p");error.textContent="Example chart unavailable.";article.append(error);}
  }
  $("helpDialog").hidden=false;
 });
