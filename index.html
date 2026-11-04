@@ -15,13 +15,9 @@
 <body class="p-type p-auto-dark-mode" style="--p-control-accent:#1769e0;--p-button-default-tint:#1769e0;color-scheme:light dark">
 <main id="app">
   <section id="setupView" class="p-container p-pane-scroll" aria-label="Connect">
-    <p>Connect directly to another person.</p>
     <div id="qrCode" aria-label="Connection QR code"></div>
     <button id="copyCode" class="p-button p-button-touch-large p-button-primary" type="button">Copy Request</button>
-    <div class="p-field-group-touch">
-      <label class="p-label" for="pasteCode">Connection code</label>
-      <textarea id="pasteCode" class="p-field p-field-touch" placeholder="Paste connection code…" rows="3"></textarea>
-    </div>
+    <textarea id="pasteCode" class="p-field p-field-touch" placeholder="Paste connection code…" rows="3"></textarea>
     <p id="error" class="p-list-touch-footer" role="status" aria-live="polite"></p>
   </section>
 
