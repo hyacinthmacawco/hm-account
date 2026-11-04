@@ -195,7 +195,6 @@ async function processPaste(){
 paste.addEventListener("paste",()=>setTimeout(processPaste,100));
 paste.addEventListener("input",()=>{if(paste.value.trim().endsWith("}"))processPaste();});
 
-$("newChatTopButton").addEventListener("click",()=>{$("chatMenu").hidden=true;startNewChat();});
 $("openChatButton").addEventListener("click",()=>$("loadChatFile").click());
 $("chatMenuButton").addEventListener("click",()=>{setVisible($("chatMenu"),$("chatMenu").style.display==="none");});
 $("sidebarCloseButton").addEventListener("click",()=>setVisible($("chatMenu"),false));
