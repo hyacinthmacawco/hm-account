@@ -68,10 +68,10 @@ function renderPendingCharts(){
   let instance;
   try{instance=new Chart(canvas,chartConfig(c));pendingChartInstances.push(instance);}catch(e){status.textContent="Preview error: "+e.message;}
   data.addEventListener("change",()=>{
-   try{const parsed=JSON.parse(data.value);if(!parsed||!Array.isArray(parsed.datasets))throw Error("Data must contain a datasets array.");c.config.data=parsed;status.textContent="";
+   try{const parsed=JSON.parse(data.value);if(!parsed||!Array.isArray(parsed.datasets))throw Error("Data must contain a datasets array.");c.config.data=parsed;c.dataError=false;status.textContent="";
     if(instance){instance.destroy();const idx=pendingChartInstances.indexOf(instance);if(idx>=0)pendingChartInstances.splice(idx,1);}
     instance=new Chart(canvas,chartConfig(c));pendingChartInstances.push(instance);
-   }catch(e){status.textContent="Invalid chart data: "+e.message;}
+   }catch(e){c.dataError=true;status.textContent="Invalid chart data: "+e.message;}
   });
   card.append(top,title,context,dataLabel,data,status,preview);holder.append(card);
  });
@@ -181,6 +181,7 @@ $("saveChatButton").addEventListener("click",()=>{
 composeButton.addEventListener("click",()=>{
  if(!composerOpen){composerOpen=true;setError("");render();return;}
  if(!pendingCharts.length){setError("Add at least one chart before sending.");return;}
+ if(pendingCharts.some(c=>c.dataError)){setError("Fix the invalid chart data before sending.");return;}
  if(!peer.isConnected()){setError("Connection is not open.");return;}
  const message={kind:"risk-chart",charts:pendingCharts.map(c=>({...c,labels:[...c.labels],values:[...c.values]})),caption:composeText.value.trim(),timestamp:Date.now()};
  try{
