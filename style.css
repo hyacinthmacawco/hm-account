@@ -321,9 +321,18 @@ body {
   padding: 0;
 }
 
-#messages canvas {
-  display: block;
+#messages .chat-chart-preview {
+  position: relative;
   width: 100%;
+  height: clamp(210px, 42vw, 320px);
+  min-width: 0;
+  overflow: hidden;
+}
+
+#messages .chat-chart-preview canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
   max-width: 100%;
 }
 
@@ -597,7 +606,7 @@ textarea {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
-  justify-content: space-between !important;
+  justify-content: flex-end !important;
   gap: 12px !important;
   width: 100% !important;
   height: auto !important;
@@ -653,6 +662,7 @@ textarea {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
+  margin-right: auto !important;
   width: auto !important;
   min-width: 0 !important;
   height: 44px !important;
